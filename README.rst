@@ -9,7 +9,17 @@ The Lasso consists in solving the following program:
 
 .. math::
 
-    \min_w \frac{1}{2} \|y - Xw\|^2_2 + \lambda \|w\|_1
+    \min_w \frac{1}{2} \|y - Xw\|^2_2 + \sum_{j=1}^p \rho_{\gamma, \lambda}(w_j)
+
+with 
+
+.. math::
+
+	\rho_{\lambda,\gamma}(t) =
+	\begin{cases}
+	\lambda |t| - \frac{t^2}{2\gamma} , &\text{if } |t| \leq \gamma\lambda ,\\
+	\frac{\lambda^2 \gamma}{2} , &\text{if } |t| > \gamma \lambda.
+	\end{cases}
 
 where n (or n_samples) stands for the number of samples, p (or n_features) stands for the number of features and
 
