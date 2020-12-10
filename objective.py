@@ -1,11 +1,12 @@
+import numpy as np
 from benchopt.base import BaseObjective
 
 
 class Objective(BaseObjective):
-    name = "Lasso Regression"
+    name = "MCP Regression"
 
     parameters = {
-        'reg': [0.05, .1, .5]
+        'reg': [[.1, 1.2], [.5, 1.2]]  # [lbda ratio, gamma
     }
 
     def __init__(self, reg=.1, fit_intercept=False):
@@ -18,7 +19,13 @@ class Objective(BaseObjective):
 
     def compute(self, beta):
         diff = self.y - self.X.dot(beta)
-        return .5 * diff.dot(diff) + self.lmbd * abs(beta).sum()
+        # beta_norm = np.sqrt(norms2 / n_samples) * beta
+
+        pen = (self.lmbd ** 2 * self.gamma / 2.) * np.ones(beta.shape)
+        small_idx = np.abs(beta) <= self.gamma * self.lmbd
+        pen[small_idx] = self.lmbd * np.abs(beta[small_idx]) - beta[small_idx] ** 2 / (2 * self.gamma)
+
+        return diff.dot(diff) / 2. + pen.sum()
 
     def _get_lambda_max(self):
         return abs(self.X.T.dot(self.y)).max()
