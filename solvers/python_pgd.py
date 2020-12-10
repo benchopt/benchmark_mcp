@@ -1,7 +1,24 @@
 import numpy as np
 
-
 from benchopt.base import BaseSolver
+from benchopt.util import safe_import_context
+
+
+with safe_import_context() as import_ctx:
+    from scipy import sparse
+    from numba import njit
+
+
+if import_ctx.failed_import:
+
+    def njit(f):  # noqa: F811
+        return f
+
+
+@njit
+def prox_mcp_vec(x, lmbd, gamma):
+    st_abs = np.maximum(np.abs(x) - lmbd, 0)
+    return np.sign(x) * np.minimum(np.abs(x), gamma / (gamma - 1) * st_abs)
 
 
 class Solver(BaseSolver):
@@ -14,7 +31,10 @@ class Solver(BaseSolver):
         self.X, self.y, self.lmbd, self.gamma = X, y, lmbd, gamma
 
     def run(self, n_iter):
-        L = np.linalg.norm(self.X, ord=2) ** 2
+        if sparse.issparse(self.X):
+            L = sparse.linalg.svds(self.X, k=1)[1][0] ** 2
+        else:
+            L = np.linalg.norm(self.X, ord=2) ** 2
 
         n_features = self.X.shape[1]
         w = np.zeros(n_features)
@@ -28,17 +48,13 @@ class Solver(BaseSolver):
                 t_new = (1 + np.sqrt(1 + 4 * t_old ** 2)) / 2
                 w_old = w.copy()
                 z -= self.X.T @ (self.X @ z - self.y) / L
-                w = self.st(z, self.lmbd / L)
+                w = prox_mcp_vec(z, self.lmbd / L, self.gamma)
                 z = w + (t_old - 1.) / t_new * (w - w_old)
             else:
                 w -= self.X.T @ (self.X @ w - self.y) / L
-                w = self.st(w, self.lmbd / L)
+                w = prox_mcp_vec(w, self.lmbd / L, self.gamma)
 
         self.w = w
-
-    def st(self, w, mu):
-        w -= np.clip(w, -mu, mu)
-        return w
 
     def get_result(self):
         return self.w
