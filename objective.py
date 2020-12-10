@@ -9,7 +9,7 @@ class Objective(BaseObjective):
         'reg': [[.1, 1.2], [.5, 1.2]]  # [lbda ratio, gamma
     }
 
-    def __init__(self, reg=.1, fit_intercept=False):
+    def __init__(self, reg=[.1, 1.2], fit_intercept=False):
         self.reg = reg
         self.fit_intercept = fit_intercept
 
@@ -32,5 +32,5 @@ class Objective(BaseObjective):
         return abs(self.X.T.dot(self.y)).max()
 
     def to_dict(self):
-        return dict(X=self.X, y=self.y, lmbd=self.lmbd,gamma=self.gamma)
+        return dict(X=self.X, y=self.y, lmbd=self.lmbd, gamma=self.gamma)
         #           fit_intercept=self.fit_intercept)
