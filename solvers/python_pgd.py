@@ -10,8 +10,8 @@ class Solver(BaseSolver):
     # any parameter defined here is accessible as a class attribute
     parameters = {'use_acceleration': [False, True]}
 
-    def set_objective(self, X, y, lmbd):
-        self.X, self.y, self.lmbd = X, y, lmbd
+    def set_objective(self, X, y, lmbd, gamma):
+        self.X, self.y, self.lmbd, self.gamma = X, y, lmbd, gamma
 
     def run(self, n_iter):
         L = np.linalg.norm(self.X, ord=2) ** 2
