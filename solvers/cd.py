@@ -23,13 +23,11 @@ def st(x, mu):
 
 @njit
 def prox_mcp(x, lmbd, gamma):
-    # prox associated to pen = 1/Lj * pen_MCP
     if x > gamma * lmbd:
         return x
     if x < - gamma * lmbd:
         return x
     return gamma / (gamma - 1) * st(x, lmbd)
-    # return st(x, lmbd/L)
 
 
 class Solver(BaseSolver):
@@ -46,7 +44,6 @@ class Solver(BaseSolver):
         self.run(1)
 
     def run(self, n_iter):
-        # L = (self.X ** 2).sum(axis=0)
         if sparse.issparse(self.X):
             self.w = self.sparse_cd(
                 self.X.data, self.X.indices, self.X.indptr, self.y, self.lmbd,
