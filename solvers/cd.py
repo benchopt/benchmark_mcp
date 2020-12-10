@@ -62,11 +62,8 @@ class Solver(BaseSolver):
         w = np.zeros(n_features)
         for _ in range(n_iter):
             for j in range(n_features):
-                if L[j] == 0.:
-                    continue
                 old = w[j]
-                w[j] = prox_mcp(w[j] + X[:, j] @ R ,
-                                lmbd , gamma)
+                w[j] = prox_mcp(w[j] + X[:, j] @ R , lmbd , gamma)
                 diff = old - w[j]
                 if diff != 0:
                     R += diff * X[:, j]
