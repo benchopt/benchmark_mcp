@@ -15,7 +15,8 @@ class Objective(BaseObjective):
 
     def set_data(self, X, y):
         self.X, self.y = X, y
-        self.lmbd = self.reg * self._get_lambda_max()
+        self.lmbd = self.reg[0] * self._get_lambda_max()
+        self.gamma = self.reg[1]
 
     def compute(self, beta):
         diff = self.y - self.X.dot(beta)

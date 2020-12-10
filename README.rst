@@ -1,4 +1,4 @@
-Benchmark repository for Lasso
+Benchmark repository for MCP
 ==============================
 
 |Build Status| |Python 3.6+|
