@@ -56,7 +56,7 @@ class Solver(BaseSolver):
 
     @staticmethod
     @njit
-    def cd(X, y, lmbd, gamma, L, n_iter):
+    def cd(X, y, lmbd, gamma, n_iter):
         n_samples, n_features = X.shape
         R = np.copy(y)
         w = np.zeros(n_features)
@@ -71,22 +71,19 @@ class Solver(BaseSolver):
 
     @staticmethod
     @njit
-    def sparse_cd(X_data, X_indices, X_indptr, y, lmbd, gamma, L, n_iter):
+    def sparse_cd(X_data, X_indices, X_indptr, y, lmbd, gamma, n_iter):
         n_features = len(X_indptr) - 1
         n_samples = len(y)
         w = np.zeros(n_features)
         R = np.copy(y)
         for _ in range(n_iter):
             for j in range(n_features):
-                if L[j] == 0.:
-                    continue
                 old = w[j]
                 start, end = X_indptr[j:j+2]
                 scal = 0.
                 for ind in range(start, end):
                     scal += X_data[ind] * R[X_indices[ind]]
-                w[j] = prox_mcp(w[j] + scal / L[j],
-                                lmbd * np.sqrt(n_samples / L[j]) , gamma)
+                w[j] = prox_mcp(w[j] + scal, lmbd, gamma)
                 diff = old - w[j]
                 if diff != 0:
                     for ind in range(start, end):
