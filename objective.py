@@ -15,8 +15,16 @@ class Objective(BaseObjective):
 
     def set_data(self, X, y):
         self.X, self.y = X, y
+        print(self.reg)
         self.lmbd = self.reg[0] * self._get_lambda_max()
         self.gamma = self.reg[1]
+    # def set_data(self, X, y):
+    #     self.X, self.y = X, y
+    #     print(self.reg)
+    #     regzip = zip(*self.reg)
+    #     lmbd, gamma = [list(tup) for tup in regzip]
+    #     self.lmbd = lmbd * self._get_lambda_max()
+    #     self.gamma = gamma
 
     def compute(self, beta):
         diff = self.y - self.X.dot(beta)
@@ -32,5 +40,5 @@ class Objective(BaseObjective):
         return abs(self.X.T.dot(self.y)).max()
 
     def to_dict(self):
-        return dict(X=self.X, y=self.y, lmbd=self.lmbd, gamma=self.gamma)
+        return dict(X=self.X, y=self.y, reg=self.reg)
         #           fit_intercept=self.fit_intercept)
