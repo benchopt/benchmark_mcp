@@ -46,13 +46,13 @@ class Solver(BaseSolver):
         self.run(1)
 
     def run(self, n_iter):
-        L = (self.X ** 2).sum(axis=0)
+        # L = (self.X ** 2).sum(axis=0)
         if sparse.issparse(self.X):
             self.w = self.sparse_cd(
                 self.X.data, self.X.indices, self.X.indptr, self.y, self.lmbd,
-                self.gamma, L, n_iter)
+                self.gamma, n_iter)
         else:
-            self.w = self.cd(self.X, self.y, self.lmbd, self.gamma, L, n_iter)
+            self.w = self.cd(self.X, self.y, self.lmbd, self.gamma, n_iter)
 
     @staticmethod
     @njit
@@ -65,8 +65,8 @@ class Solver(BaseSolver):
                 if L[j] == 0.:
                     continue
                 old = w[j]
-                w[j] = prox_mcp(w[j] + X[:, j] @ R / L[j],
-                                lmbd * np.sqrt(n_samples / L[j]) , gamma)
+                w[j] = prox_mcp(w[j] + X[:, j] @ R ,
+                                lmbd , gamma)
                 diff = old - w[j]
                 if diff != 0:
                     R += diff * X[:, j]
