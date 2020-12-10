@@ -6,18 +6,20 @@ class Objective(BaseObjective):
     name = "MCP Regression"
 
     parameters = {
-        'reg': [[.1, 1.2], [.5, 1.2]]  # [lbda ratio, gamma
+        #'reg': [[.1, 1.2], [.5, 1.2]]  # [lbda ratio, gamma
+        'reg': [0.1, 0.5],
+        'gamma': [1.2, 1.2]
     }
 
-    def __init__(self, reg=[.1, 1.2], fit_intercept=False):
+    def __init__(self, reg=.1, gamma=1.2):
         self.reg = reg
-        self.fit_intercept = fit_intercept
-
+        self.gamma = gamma
+        
     def set_data(self, X, y):
         self.X, self.y = X, y
-        print(self.reg)
-        self.lmbd = self.reg[0] * self._get_lambda_max()
-        self.gamma = self.reg[1]
+        #print(self.reg)
+        self.lmbd = self.reg * self._get_lambda_max()
+        
     # def set_data(self, X, y):
     #     self.X, self.y = X, y
     #     print(self.reg)
@@ -40,5 +42,5 @@ class Objective(BaseObjective):
         return abs(self.X.T.dot(self.y)).max()
 
     def to_dict(self):
-        return dict(X=self.X, y=self.y, reg=self.reg)
+        return dict(X=self.X, y=self.y, lmbd=self.lmbd, gamma=self.gamma)
         #           fit_intercept=self.fit_intercept)
