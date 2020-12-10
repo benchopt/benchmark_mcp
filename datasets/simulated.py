@@ -26,7 +26,8 @@ class Dataset(BaseDataset):
         rng = np.random.RandomState(self.random_state)
         X = rng.randn(self.n_samples, self.n_features)
         y = rng.randn(self.n_samples)
-
+        # Normalized by default
+        X /= ((X ** 2).sum(axis=0))
         data = dict(X=X, y=y)
 
         return self.n_features, data
