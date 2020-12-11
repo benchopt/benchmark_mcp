@@ -33,7 +33,6 @@ def prox_mcp(x, lmbd, gamma):
 
 class Solver(BaseSolver):
     name = "cd"
-
     install_cmd = 'conda'
     requirements = ['numba', 'scipy']
 
