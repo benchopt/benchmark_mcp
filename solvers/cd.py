@@ -12,6 +12,7 @@ if import_ctx.failed_import:
     def njit(f):  # noqa: F811
         return f
 
+
 @njit
 def st(x, mu):
     if x > mu:
@@ -39,6 +40,7 @@ class Solver(BaseSolver):
     def set_objective(self, X, y, lmbd, gamma):
         # use Fortran order to compute gradient on contiguous columns
         self.X, self.y, self.lmbd, self.gamma = np.asfortranarray(X), y, lmbd, gamma
+        self.lmbd, self.gamma = lmbd, gamma
 
         # Make sure we cache the numba compilation.
         self.run(1)

@@ -20,10 +20,10 @@ class Objective(BaseObjective):
 
     def compute(self, beta):
         diff = self.y - self.X.dot(beta)
-
         pen = (self.lmbd ** 2 * self.gamma / 2.) * np.ones(beta.shape)
-        small_idx = np.abs(beta) <= self.gamma * self.lmbd
-        pen[small_idx] = self.lmbd * np.abs(beta[small_idx]) - beta[small_idx] ** 2 / (2 * self.gamma)
+        idx = np.abs(beta) <= self.gamma * self.lmbd
+        gamma2 = self.gamma * 2
+        pen[idx] = self.lmbd * np.abs(beta[idx]) - beta[idx] ** 2 / gamma2
 
         return diff.dot(diff) / 2. + pen.sum()
 
