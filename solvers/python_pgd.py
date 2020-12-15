@@ -1,6 +1,6 @@
 import numpy as np
 
-from benchopt.base import BaseSolver
+from benchopt import BaseSolver
 from benchopt.util import safe_import_context
 
 
