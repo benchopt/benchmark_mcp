@@ -6,7 +6,6 @@ with safe_import_context() as import_ctx:
     from scipy import sparse
     from numba import njit
 
-
 if import_ctx.failed_import:
 
     def njit(f):  # noqa: F811
@@ -21,6 +20,8 @@ def prox_mcp_vec(x, lmbd, gamma):
 
 class Solver(BaseSolver):
     name = 'Python-PGD'  # proximal gradient, optionally accelerated
+
+    requirements = ['numba']
 
     # any parameter defined here is accessible as a class attribute
     parameters = {'use_acceleration': [False, True]}
