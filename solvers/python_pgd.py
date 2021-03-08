@@ -22,6 +22,11 @@ class Solver(BaseSolver):
     name = 'Python-PGD'  # proximal gradient, optionally accelerated
 
     requirements = ['numba']
+    references = [
+        'J. Bolte, S. Sabach and M. Teboulle, "Proximal alternating '
+        'linearized minimization for nonconvex and nonsmooth problems", '
+        'Math. Program., vol. 146, pp. 459-494 (2014)'
+    ]
 
     # any parameter defined here is accessible as a class attribute
     parameters = {'use_acceleration': [False, True]}

@@ -33,6 +33,12 @@ class Solver(BaseSolver):
     name = "cd"
     install_cmd = 'conda'
     requirements = ['numba']
+    references = [
+        'P. Breheny and J. Huang, "Coordinate descent algorithms for '
+        'nonconvex  penalized regression, with applications to biological '
+        'feature selection for Scaling Sparse Optimization", '
+        'Ann. Appl. Stat.,  vol. 5, pp. 232 (2011)'
+    ]
 
     def set_objective(self, X, y, lmbd, gamma):
         # use Fortran order to compute gradient on contiguous columns
