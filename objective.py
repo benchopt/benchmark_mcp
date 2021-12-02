@@ -13,7 +13,7 @@ class Objective(BaseObjective):
     def __init__(self, reg=.1, gamma=1.2):
         self.reg = reg
         self.gamma = gamma
-
+        
     def set_data(self, X, y):
         self.X, self.y = X, y
         self.lmbd = self.reg * self._get_lambda_max()
@@ -26,9 +26,11 @@ class Objective(BaseObjective):
         pen[idx] = self.lmbd * np.abs(beta[idx]) - beta[idx] ** 2 / gamma2
 
         return diff.dot(diff) / 2. + pen.sum()
+      
 
     def _get_lambda_max(self):
         return abs(self.X.T.dot(self.y)).max()
 
     def to_dict(self):
         return dict(X=self.X, y=self.y, lmbd=self.lmbd, gamma=self.gamma)
+

@@ -5,6 +5,7 @@ with safe_import_context() as import_ctx:
     import numpy as np
 
 
+
 class Dataset(BaseDataset):
 
     name = "Simulated"
@@ -16,6 +17,7 @@ class Dataset(BaseDataset):
             (100, 200),
             # (6, 12)
         ]
+
     }
 
     def __init__(self, n_samples=10, n_features=50, random_state=27):
