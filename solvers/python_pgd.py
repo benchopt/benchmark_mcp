@@ -52,11 +52,11 @@ class Solver(BaseSolver):
                 t_new = (1 + np.sqrt(1 + 4 * t_old ** 2)) / 2
                 w_old = w.copy()
                 z -= self.X.T @ (self.X @ z - self.y) / L
-                w = prox_mcp_vec(z, self.lmbd / L, self.gamma)
+                w = prox_mcp_vec(z, self.lmbd / L, self.gamma * L)
                 z = w + (t_old - 1.) / t_new * (w - w_old)
             else:
                 w -= self.X.T @ (self.X @ w - self.y) / L
-                w = prox_mcp_vec(w, self.lmbd / L, self.gamma)
+                w = prox_mcp_vec(w, self.lmbd / L, self.gamma * L)
 
         self.w = w
 

@@ -5,6 +5,7 @@ with safe_import_context() as import_ctx:
     from scipy import sparse
     from numba import njit
 
+
 if import_ctx.failed_import:
 
     def njit(f):  # noqa: F811
@@ -54,18 +55,21 @@ class Solver(BaseSolver):
                 self.X.data, self.X.indices, self.X.indptr, self.y, self.lmbd,
                 self.gamma, n_iter)
         else:
-            self.w = self.cd(self.X, self.y, self.lmbd, self.gamma, n_iter)
+            lipschitz = np.sum(self.X ** 2, axis=0)
+            self.w = self.cd(
+                self.X, self.y, self.lmbd, self.gamma, lipschitz, n_iter)
 
     @staticmethod
     @njit
-    def cd(X, y, lmbd, gamma, n_iter):
+    def cd(X, y, lmbd, gamma, lipschitz, n_iter):
         n_features = X.shape[1]
         R = np.copy(y)
         w = np.zeros(n_features)
         for _ in range(n_iter):
             for j in range(n_features):
                 old = w[j]
-                w[j] = prox_mcp(w[j] + X[:, j] @ R, lmbd, gamma)
+                w[j] = prox_mcp(w[j] + X[:, j] @ R / lipschitz[j],
+                                lmbd / lipschitz[j], gamma * lipschitz[j])
                 diff = old - w[j]
                 if diff != 0:
                     R += diff * X[:, j]

@@ -13,8 +13,9 @@ class Dataset(BaseDataset):
     # the cross product for each key in the dictionary.
     parameters = {
         'n_samples, n_features': [
-            (4, 7),
-            (6, 12)]
+            (100, 200),
+            # (6, 12)
+        ]
     }
 
     def __init__(self, n_samples=10, n_features=50, random_state=27):
