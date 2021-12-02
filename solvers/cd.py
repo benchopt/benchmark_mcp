@@ -62,7 +62,9 @@ class Solver(BaseSolver):
             )
         else:
             lipschitz = np.sum(self.X ** 2, axis=0)
-            self.w = self.cd(self.X, self.y, self.lmbd, self.gamma, lipschitz, n_iter)
+            self.w = self.cd(
+                self.X, self.y, self.lmbd, self.gamma, lipschitz, n_iter
+            )
 
     @staticmethod
     @njit
@@ -92,7 +94,7 @@ class Solver(BaseSolver):
         for _ in range(n_iter):
             for j in range(n_features):
                 old = w[j]
-                start, end = X_indptr[j : j + 2]
+                start, end = X_indptr[j: j + 2]
                 scal = 0.0
                 for ind in range(start, end):
                     scal += X_data[ind] * R[X_indices[ind]]
