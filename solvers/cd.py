@@ -72,6 +72,7 @@ class Solver(BaseSolver):
         return w
 
     @staticmethod
+    @njit
     def sparse_cd(X_data, X_indices, X_indptr, y, lmbd, gamma, n_iter):
         n_features = len(X_indptr) - 1
         w = np.zeros(n_features)
