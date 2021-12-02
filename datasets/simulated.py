@@ -5,6 +5,7 @@ with safe_import_context() as import_ctx:
     import numpy as np
 
 
+
 class Dataset(BaseDataset):
 
     name = "Simulated"
@@ -13,8 +14,8 @@ class Dataset(BaseDataset):
     # the cross product for each key in the dictionary.
     parameters = {
         'n_samples, n_features': [
-            (4, 7),
-            (6, 12)]
+            (100, 5000),
+            (100, 10000)]
     }
 
     def __init__(self, n_samples=10, n_features=50, random_state=27):
