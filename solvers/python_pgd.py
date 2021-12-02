@@ -19,17 +19,17 @@ def prox_mcp_vec(x, lmbd, gamma):
 
 
 class Solver(BaseSolver):
-    name = 'Python-PGD'  # proximal gradient, optionally accelerated
+    name = "Python-PGD"  # proximal gradient, optionally accelerated
 
-    requirements = ['numba']
+    requirements = ["numba"]
     references = [
         'J. Bolte, S. Sabach and M. Teboulle, "Proximal alternating '
         'linearized minimization for nonconvex and nonsmooth problems", '
-        'Math. Program., vol. 146, pp. 459-494 (2014)'
+        "Math. Program., vol. 146, pp. 459-494 (2014)"
     ]
 
     # any parameter defined here is accessible as a class attribute
-    parameters = {'use_acceleration': [False, True]}
+    parameters = {"use_acceleration": [False, True]}
 
     def set_objective(self, X, y, lmbd, gamma):
         self.X, self.y, self.lmbd, self.gamma = X, y, lmbd, gamma
@@ -53,7 +53,7 @@ class Solver(BaseSolver):
                 w_old = w.copy()
                 z -= self.X.T @ (self.X @ z - self.y) / L
                 w = prox_mcp_vec(z, self.lmbd / L, self.gamma * L)
-                z = w + (t_old - 1.) / t_new * (w - w_old)
+                z = w + (t_old - 1.0) / t_new * (w - w_old)
             else:
                 w -= self.X.T @ (self.X @ w - self.y) / L
                 w = prox_mcp_vec(w, self.lmbd / L, self.gamma * L)

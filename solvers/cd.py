@@ -16,7 +16,7 @@ if import_ctx.failed_import:
 def st(x, mu):
     if x > mu:
         return x - mu
-    if x < - mu:
+    if x < -mu:
         return x + mu
     return 0
 
@@ -25,20 +25,20 @@ def st(x, mu):
 def prox_mcp(x, lmbd, gamma):
     if x > gamma * lmbd:
         return x
-    if x < - gamma * lmbd:
+    if x < -gamma * lmbd:
         return x
     return gamma / (gamma - 1) * st(x, lmbd)
 
 
 class Solver(BaseSolver):
     name = "cd"
-    install_cmd = 'conda'
-    requirements = ['numba']
+    install_cmd = "conda"
+    requirements = ["numba"]
     references = [
         'P. Breheny and J. Huang, "Coordinate descent algorithms for '
-        'nonconvex  penalized regression, with applications to biological '
+        "nonconvex  penalized regression, with applications to biological "
         'feature selection for Scaling Sparse Optimization", '
-        'Ann. Appl. Stat.,  vol. 5, pp. 232 (2011)'
+        "Ann. Appl. Stat.,  vol. 5, pp. 232 (2011)"
     ]
 
     def set_objective(self, X, y, lmbd, gamma):
@@ -52,12 +52,17 @@ class Solver(BaseSolver):
     def run(self, n_iter):
         if sparse.issparse(self.X):
             self.w = self.sparse_cd(
-                self.X.data, self.X.indices, self.X.indptr, self.y, self.lmbd,
-                self.gamma, n_iter)
+                self.X.data,
+                self.X.indices,
+                self.X.indptr,
+                self.y,
+                self.lmbd,
+                self.gamma,
+                n_iter,
+            )
         else:
             lipschitz = np.sum(self.X ** 2, axis=0)
-            self.w = self.cd(
-                self.X, self.y, self.lmbd, self.gamma, lipschitz, n_iter)
+            self.w = self.cd(self.X, self.y, self.lmbd, self.gamma, lipschitz, n_iter)
 
     @staticmethod
     @njit
@@ -68,8 +73,11 @@ class Solver(BaseSolver):
         for _ in range(n_iter):
             for j in range(n_features):
                 old = w[j]
-                w[j] = prox_mcp(w[j] + X[:, j] @ R / lipschitz[j],
-                                lmbd / lipschitz[j], gamma * lipschitz[j])
+                w[j] = prox_mcp(
+                    w[j] + X[:, j] @ R / lipschitz[j],
+                    lmbd / lipschitz[j],
+                    gamma * lipschitz[j],
+                )
                 diff = old - w[j]
                 if diff != 0:
                     R += diff * X[:, j]
@@ -84,8 +92,8 @@ class Solver(BaseSolver):
         for _ in range(n_iter):
             for j in range(n_features):
                 old = w[j]
-                start, end = X_indptr[j:j+2]
-                scal = 0.
+                start, end = X_indptr[j : j + 2]
+                scal = 0.0
                 for ind in range(start, end):
                     scal += X_data[ind] * R[X_indices[ind]]
                 w[j] = prox_mcp(w[j] + scal, lmbd, gamma)
