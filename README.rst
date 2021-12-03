@@ -34,7 +34,7 @@ Apart from the problem, options can be passed to `benchopt run`, to restrict the
 
 .. code-block::
 
-	$ benchopt run ./benchmark_mcp -s cd -d Simulate --max-runs 10 --n-repetitions 10
+	$ benchopt run ./benchmark_mcp -s cd -d simulated --max-runs 10 --n-repetitions 5
 
 
 Use `benchopt run -h` for more details about these options, or visit https://benchopt.github.io/cli.html.
