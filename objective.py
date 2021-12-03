@@ -16,16 +16,17 @@ class Objective(BaseObjective):
         self.lmbd = self.reg * self._get_lambda_max()
 
     def compute(self, beta):
-        diff = self.y - self.X.dot(beta)
-        pen = (self.lmbd ** 2 * self.gamma / 2.0) * np.ones(beta.shape)
+        diff = self.y - self.X @ beta
+        pen = np.full(len(beta), 0.5 * self.lmbd ** 2 * self.gamma)
         idx = np.abs(beta) <= self.gamma * self.lmbd
-        gamma2 = self.gamma * 2
-        pen[idx] = self.lmbd * np.abs(beta[idx]) - beta[idx] ** 2 / gamma2
+        pen[idx] = (self.lmbd * np.abs(beta[idx]) -
+                    0.5 * beta[idx] ** 2 / self.gamma ** 2)
 
-        return diff.dot(diff) / 2.0 + pen.sum()
+        return dict(value=0.5 * diff @ diff + pen.sum(),
+                    sparsity=(beta != 0).sum())
 
     def _get_lambda_max(self):
-        return abs(self.X.T.dot(self.y)).max()
+        return abs(self.X.T @ self.y).max()
 
     def to_dict(self):
         return dict(X=self.X, y=self.y, lmbd=self.lmbd, gamma=self.gamma)
