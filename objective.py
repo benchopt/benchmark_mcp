@@ -5,7 +5,7 @@ from benchopt import BaseObjective
 class Objective(BaseObjective):
     name = "MCP Regression"
 
-    parameters = {"reg": [0.1, 0.5], "gamma": [1.2, 1.2]}
+    parameters = {"reg": [1, 0.5, 0.1], "gamma": [1.2]}
 
     def __init__(self, reg=0.1, gamma=1.2):
         self.reg = reg
@@ -20,7 +20,7 @@ class Objective(BaseObjective):
         pen = np.full(len(beta), 0.5 * self.lmbd ** 2 * self.gamma)
         idx = np.abs(beta) <= self.gamma * self.lmbd
         pen[idx] = (self.lmbd * np.abs(beta[idx]) -
-                    0.5 * beta[idx] ** 2 / self.gamma ** 2)
+                    0.5 * beta[idx] ** 2 / self.gamma)
 
         return dict(value=0.5 * diff @ diff + pen.sum(),
                     sparsity=(beta != 0).sum())
