@@ -22,6 +22,7 @@ class Solver(BaseSolver):
     name = "Python-PGD"  # proximal gradient, optionally accelerated
 
     requirements = ["numba"]
+    # TODO add GIST (Gong et al ICML 2012) to the refs?
     references = [
         'J. Bolte, S. Sabach and M. Teboulle, "Proximal alternating '
         'linearized minimization for nonconvex and nonsmooth problems", '
@@ -33,6 +34,9 @@ class Solver(BaseSolver):
 
     def set_objective(self, X, y, lmbd, gamma):
         self.X, self.y, self.lmbd, self.gamma = X, y, lmbd, gamma
+
+        # cache compilation time for prox_mcp_vec:
+        self.run(1)
 
     def run(self, n_iter):
         if sparse.issparse(self.X):
