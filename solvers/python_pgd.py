@@ -14,8 +14,16 @@ if import_ctx.failed_import:
 
 @njit
 def prox_mcp_vec(x, lmbd, gamma):
-    st_abs = np.maximum(np.abs(x) - lmbd, 0)
-    return np.sign(x) * np.minimum(np.abs(x), gamma / (gamma - 1) * st_abs)
+    # because of gamma scaling by lipschitz, gamma can be < 1
+    # in which case prox=IHT
+    prox = x.copy()
+    if gamma <= 1:
+        prox[np.abs(x) <= lmbd] = 0.
+    else:
+        idx = np.abs(x) <= gamma * lmbd
+        prox[idx] = gamma / (gamma - 1) * np.sign(x[idx]) * \
+            np.maximum(0, np.abs(x[idx]) - lmbd)
+    return prox
 
 
 class Solver(BaseSolver):
