@@ -27,7 +27,7 @@ def prox_mcp_vec(x, lmbd, gamma):
 
 
 class Solver(BaseSolver):
-    name = "Python-PGD"  # proximal gradient, optionally accelerated
+    name = "PGD"  # proximal gradient, optionally accelerated
 
     requirements = ["numba"]
     # TODO add GIST (Gong et al ICML 2012) to the refs?

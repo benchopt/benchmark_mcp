@@ -31,7 +31,7 @@ class Dataset(BaseDataset):
         X = rng.randn(self.n_samples, self.n_features)
         y = rng.randn(self.n_samples)
         if self.normalize:
-            X /= (X ** 2).sum(axis=0)
+            X /= np.linalg.norm(X, axis=0)
         data = dict(X=X, y=y)
 
         return self.n_features, data
