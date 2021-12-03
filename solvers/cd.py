@@ -23,6 +23,10 @@ def st(x, mu):
 
 @njit
 def prox_mcp(x, lmbd, gamma):
+    if gamma < 1:
+        return 0 if abs(x) <= lmbd else x
+        # TODO potential numerical errors in <=  leading to hard discontinuity
+
     if x > gamma * lmbd:
         return x
     if x < -gamma * lmbd:
