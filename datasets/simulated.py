@@ -15,7 +15,7 @@ class Dataset(BaseDataset):
         "n_samples, n_features": [
             (100, 200),
         ],
-        "normalize": [True, False],
+        "normalize": [True],
     }
 
     def __init__(self, n_samples=10, n_features=50, normalize=False):
