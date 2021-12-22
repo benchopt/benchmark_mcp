@@ -45,15 +45,16 @@ class Solver(BaseSolver):
     @staticmethod
     def reweighted(X, y, lmbd, gamma, n_iter, n_iter_weighted=5):
         # First weights is equivalent to a simple Lasso
-        weights = np.ones(X.shape[1]) * lmbd
+        weights = np.ones(X.shape[1])
         for k in range(n_iter_weighted):
-            # should we warm start with previous solution or restart from 0 ?
-            clf = WeightedLasso(alpha=lmbd, tol=1e-12, fit_intercept=False,
+            clf = WeightedLasso(alpha=lmbd / len(y), tol=1e-12,
+                                fit_intercept=False,
                                 weights=weights, max_iter=n_iter)
             clf.fit(X, y)
+            coefs = clf.coef_
             # Update weights
-            weights = gprime(clf.coef_, lmbd, gamma)
-        return clf.coef_
+            weights = gprime(coefs, lmbd / len(y), gamma * len(y))
+        return coefs
 
     def get_result(self):
         return self.w
