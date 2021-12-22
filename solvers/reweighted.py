@@ -13,9 +13,8 @@ if import_ctx.failed_import:
 
 
 @njit
-def gprime(x, lmbd, gamma):
-    return np.maximum(
-        0, lmbd - np.abs(x) / gamma)
+def deriv_mcp(x, lmbd, gamma):
+    return np.maximum(0, lmbd - np.abs(x) / gamma)
 
 
 class Solver(BaseSolver):
@@ -46,14 +45,15 @@ class Solver(BaseSolver):
     def reweighted(X, y, lmbd, gamma, n_iter, n_iter_weighted=5):
         # First weights is equivalent to a simple Lasso
         weights = np.ones(X.shape[1])
-        for k in range(n_iter_weighted):
+        for _ in range(n_iter_weighted):
             clf = WeightedLasso(alpha=lmbd / len(y), tol=1e-12,
                                 fit_intercept=False,
-                                weights=weights, max_iter=n_iter)
+                                weights=weights, max_iter=n_iter,
+                                warm_start=True)
             clf.fit(X, y)
             coefs = clf.coef_
-            # Update weights
-            weights = gprime(coefs, lmbd / len(y), gamma * len(y))
+            # Update weights as derivative of MCP penalty
+            weights = deriv_mcp(coefs, lmbd / len(y), gamma * len(y))
         return coefs
 
     def get_result(self):
