@@ -21,7 +21,10 @@ def subdiff_distance(w, grad, lmbd, gamma):
 class Objective(BaseObjective):
     name = "MCP Regression"
 
-    parameters = {"reg": [0.1, 0.01], "gamma": [1.5]}
+    parameters = {
+        # "reg": [0.5, 0.01],
+        "reg": [0.5],
+        "gamma": [3]}
 
     def __init__(self, reg=0.1, gamma=1.2):
         self.reg = reg
