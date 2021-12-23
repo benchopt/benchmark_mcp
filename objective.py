@@ -25,8 +25,8 @@ class Objective(BaseObjective):
     parameters = {"reg": [0.5, 0.1, 0.01, 0.001], "gamma": [1.5]}
 =======
     parameters = {
-        # "reg": [0.5, 0.01],
-        "reg": [0.5],
+        "reg": [0.5, 0.01, 0.001],
+        # "reg": [0.5],
         "gamma": [3]}
 >>>>>>> d63447085a8c44172ff8a8441accc95f9fb4a910
 
