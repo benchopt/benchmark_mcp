@@ -8,7 +8,7 @@ def subdiff_distance(w, grad, lmbd, gamma):
         if w[j] == 0:
             # distance of grad to alpha * [-1, 1]
             subdiff_dist[j] = max(0, np.abs(grad[j]) - lmbd)
-        elif np.abs(w[j]) < lmbd * gamma:
+        elif np.abs(w[j]) <= lmbd * gamma:
             # distance of grad_j to (alpha - abs(w[j])/gamma) * sign(w[j])
             subdiff_dist[j] = np.abs(
                 -grad[j] + lmbd * np.sign(w[j]) - w[j] / gamma)
@@ -21,7 +21,7 @@ def subdiff_distance(w, grad, lmbd, gamma):
 class Objective(BaseObjective):
     name = "MCP Regression"
 
-    parameters = {"reg": [0.1, 0.01], "gamma": [1.5]}
+    parameters = {"reg": [0.5, 0.1, 0.01, 0.001], "gamma": [1.5]}
 
     def __init__(self, reg=0.1, gamma=1.2):
         self.reg = reg
