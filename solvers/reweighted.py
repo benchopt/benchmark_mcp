@@ -4,7 +4,7 @@ with safe_import_context() as import_ctx:
     import numpy as np
     from numba import njit
     from flashcd.estimators import WeightedLasso
-
+    from flashcd.penalties import WeightedL1
 
 if import_ctx.failed_import:
 
@@ -29,11 +29,10 @@ class Solver(BaseSolver):
     ]
 
     def set_objective(self, X, y, lmbd, gamma):
-        # use Fortran order to compute gradient on contiguous columns
         self.X, self.y = np.asfortranarray(X), y
         self.lmbd, self.gamma = lmbd, gamma
 
-        # Make sure we cache the numba compilation.
+        # cache the numba compilation.
         self.run(1)
 
     def run(self, n_iter):
@@ -44,17 +43,18 @@ class Solver(BaseSolver):
     @staticmethod
     def reweighted(X, y, lmbd, gamma, n_iter, n_iter_weighted=5):
         # First weights is equivalent to a simple Lasso
-        weights = np.ones(X.shape[1])
+        weights = lmbd * np.ones(X.shape[1])
+        clf = WeightedLasso(alpha=1, tol=1e-12,
+                            fit_intercept=False,
+                            weights=weights, max_iter=n_iter,
+                            warm_start=True)
         for _ in range(n_iter_weighted):
-            clf = WeightedLasso(alpha=lmbd, tol=1e-12,
-                                fit_intercept=False,
-                                weights=weights, max_iter=n_iter,
-                                warm_start=True)
+            penalty = WeightedL1(1, weights)
+            clf.penalty = penalty
             clf.fit(X, y)
-            coefs = clf.coef_
             # Update weights as derivative of MCP penalty
-            weights = deriv_mcp(coefs, lmbd, gamma)
-        return coefs
+            weights = deriv_mcp(clf.coef_, lmbd, gamma)
+        return clf.coef_
 
     def get_result(self):
         return self.w
