@@ -11,8 +11,8 @@ class Solver(BaseSolver):
     def set_objective(self, X, y, lmbd, gamma):
         self.X, self.y = np.asfortranarray(X), y
         self.lmbd, self.gamma = lmbd, gamma
-        self.clf = MCP(alpha=lmbd / len(y), gamma=gamma *
-                       len(y), fit_intercept=False)
+        self.clf = MCP(alpha=lmbd, gamma=gamma,
+                       fit_intercept=False)
 
         # Make sure we cache the numba compilation.
         self.run(1)

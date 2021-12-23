@@ -46,14 +46,14 @@ class Solver(BaseSolver):
         # First weights is equivalent to a simple Lasso
         weights = np.ones(X.shape[1])
         for _ in range(n_iter_weighted):
-            clf = WeightedLasso(alpha=lmbd / len(y), tol=1e-12,
+            clf = WeightedLasso(alpha=lmbd, tol=1e-12,
                                 fit_intercept=False,
                                 weights=weights, max_iter=n_iter,
                                 warm_start=True)
             clf.fit(X, y)
             coefs = clf.coef_
             # Update weights as derivative of MCP penalty
-            weights = deriv_mcp(coefs, lmbd / len(y), gamma * len(y))
+            weights = deriv_mcp(coefs, lmbd, gamma)
         return coefs
 
     def get_result(self):
