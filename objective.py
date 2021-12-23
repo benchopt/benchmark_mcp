@@ -2,6 +2,22 @@ import numpy as np
 from benchopt import BaseObjective
 
 
+def subdiff_distance(w, grad, lmbd, gamma):
+    subdiff_dist = np.zeros_like(grad)
+    for j in range(len(w)):
+        if w[j] == 0:
+            # distance of grad to alpha * [-1, 1]
+            subdiff_dist[j] = max(0, np.abs(grad[j]) - lmbd)
+        elif np.abs(w[j]) < lmbd * gamma:
+            # distance of grad_j to (alpha - abs(w[j])/gamma) * sign(w[j])
+            subdiff_dist[j] = np.abs(
+                -grad[j] + lmbd * np.sign(w[j]) - w[j] / gamma)
+        else:
+            # distance of grad to 0
+            subdiff_dist[j] = np.abs(grad[j])
+    return subdiff_dist
+
+
 class Objective(BaseObjective):
     name = "MCP Regression"
 
@@ -17,16 +33,20 @@ class Objective(BaseObjective):
 
     def compute(self, beta):
         diff = self.y - self.X @ beta
-        pen = np.full(len(beta), 0.5 * self.lmbd ** 2 * self.gamma)
+        pen = (self.lmbd ** 2 * self.gamma / 2.) * np.ones(beta.shape)
         idx = np.abs(beta) <= self.gamma * self.lmbd
-        pen[idx] = (self.lmbd * np.abs(beta[idx]) -
-                    0.5 * beta[idx] ** 2 / self.gamma)
+        gamma2 = self.gamma * 2
+        pen[idx] = self.lmbd * np.abs(beta[idx]) - beta[idx] ** 2 / gamma2
 
-        return dict(value=0.5 * diff @ diff + pen.sum(),
-                    sparsity=(beta != 0).sum())
+        # compute distance of -grad f to subdifferential of MCP penalty
+        grad = self.X.T @ diff / len(self.y)
+        opt = subdiff_distance(beta, grad, self.lmbd, self.gamma)
+
+        return dict(value=0.5 * diff @ diff / len(self.y) + pen.sum(),
+                    sparsity=(beta != 0).sum(), opt=opt.max())
 
     def _get_lambda_max(self):
-        return abs(self.X.T @ self.y).max()
+        return abs(self.X.T @ self.y).max() / len(self.y)
 
     def to_dict(self):
         return dict(X=self.X, y=self.y, lmbd=self.lmbd, gamma=self.gamma)

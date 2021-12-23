@@ -55,6 +55,7 @@ class Solver(BaseSolver):
 
     def run(self, n_iter):
         if sparse.issparse(self.X):
+            # TODO this only works when the lipschitz constants are 1
             self.w = self.sparse_cd(
                 self.X.data,
                 self.X.indices,
@@ -65,7 +66,7 @@ class Solver(BaseSolver):
                 n_iter,
             )
         else:
-            lipschitz = np.sum(self.X ** 2, axis=0)
+            lipschitz = np.sum(self.X ** 2, axis=0) / len(self.y)
             self.w = self.cd(
                 self.X, self.y, self.lmbd, self.gamma, lipschitz, n_iter
             )
@@ -73,14 +74,14 @@ class Solver(BaseSolver):
     @staticmethod
     @njit
     def cd(X, y, lmbd, gamma, lipschitz, n_iter):
-        n_features = X.shape[1]
+        n_samples, n_features = X.shape
         R = np.copy(y)
         w = np.zeros(n_features)
         for _ in range(n_iter):
             for j in range(n_features):
                 old = w[j]
                 w[j] = prox_mcp(
-                    w[j] + X[:, j] @ R / lipschitz[j],
+                    w[j] + X[:, j] @ R / (lipschitz[j] * n_samples),
                     lmbd / lipschitz[j],
                     gamma * lipschitz[j],
                 )
@@ -93,19 +94,20 @@ class Solver(BaseSolver):
     @njit
     def sparse_cd(X_data, X_indices, X_indptr, y, lmbd, gamma, n_iter):
         n_features = len(X_indptr) - 1
+        n_samples = len(y)
         w = np.zeros(n_features)
         R = np.copy(y)
         for _ in range(n_iter):
             for j in range(n_features):
                 old = w[j]
-                start, end = X_indptr[j: j + 2]
-                scal = 0.0
-                for ind in range(start, end):
-                    scal += X_data[ind] * R[X_indices[ind]]
-                w[j] = prox_mcp(w[j] + scal, lmbd, gamma)
+                grad = 0.0
+                for ind in range(X_indptr[j], X_indptr[j + 1]):
+                    grad += X_data[ind] * R[X_indices[ind]]
+
+                w[j] = prox_mcp(w[j] + grad / n_samples, lmbd, gamma)
                 diff = old - w[j]
                 if diff != 0:
-                    for ind in range(start, end):
+                    for ind in range(X_indptr[j], X_indptr[j + 1]):
                         R[X_indices[ind]] += diff * X_data[ind]
         return w
 

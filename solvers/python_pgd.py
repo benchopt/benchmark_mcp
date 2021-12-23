@@ -47,12 +47,13 @@ class Solver(BaseSolver):
         self.run(1)
 
     def run(self, n_iter):
-        if sparse.issparse(self.X):
-            L = sparse.linalg.svds(self.X, k=1)[1][0] ** 2
-        else:
-            L = np.linalg.norm(self.X, ord=2) ** 2
+        n_samples, n_features = self.X.shape
 
-        n_features = self.X.shape[1]
+        if sparse.issparse(self.X):
+            L = sparse.linalg.svds(self.X, k=1)[1][0] ** 2 / n_samples
+        else:
+            L = np.linalg.norm(self.X, ord=2) ** 2 / n_samples
+
         w = np.zeros(n_features)
         if self.use_acceleration:
             z = np.zeros(n_features)
@@ -63,11 +64,11 @@ class Solver(BaseSolver):
                 t_old = t_new
                 t_new = (1 + np.sqrt(1 + 4 * t_old ** 2)) / 2
                 w_old = w.copy()
-                z -= self.X.T @ (self.X @ z - self.y) / L
+                z -= self.X.T @ (self.X @ z - self.y) / (L * n_samples)
                 w = prox_mcp_vec(z, self.lmbd / L, self.gamma * L)
                 z = w + (t_old - 1.0) / t_new * (w - w_old)
             else:
-                w -= self.X.T @ (self.X @ w - self.y) / L
+                w -= self.X.T @ (self.X @ w - self.y) / (L * n_samples)
                 w = prox_mcp_vec(w, self.lmbd / L, self.gamma * L)
 
         self.w = w
