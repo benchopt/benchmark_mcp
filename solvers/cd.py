@@ -74,7 +74,7 @@ class Solver(BaseSolver):
     @staticmethod
     @njit
     def cd(X, y, lmbd, gamma, lipschitz, n_iter):
-        n_samples, n_features = X.shape[1]
+        n_samples, n_features = X.shape
         R = np.copy(y)
         w = np.zeros(n_features)
         for _ in range(n_iter):
