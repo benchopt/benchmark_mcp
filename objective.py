@@ -22,7 +22,7 @@ class Objective(BaseObjective):
         pen[idx] = (self.lmbd * np.abs(beta[idx]) -
                     0.5 * beta[idx] ** 2 / self.gamma)
 
-        return dict(value=0.5 * diff @ diff + pen.sum(),
+        return dict(value=0.5 * diff @ diff / len(diff) + pen.sum(),
                     sparsity=(beta != 0).sum())
 
     def _get_lambda_max(self):
