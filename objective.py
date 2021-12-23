@@ -32,21 +32,21 @@ class Objective(BaseObjective):
         self.lmbd = self.reg * self._get_lambda_max()
 
     def compute(self, beta):
-        diff = self.y - self.X.dot(beta)
+        diff = self.y - self.X @ beta
         pen = (self.lmbd ** 2 * self.gamma / 2.) * np.ones(beta.shape)
         idx = np.abs(beta) <= self.gamma * self.lmbd
         gamma2 = self.gamma * 2
         pen[idx] = self.lmbd * np.abs(beta[idx]) - beta[idx] ** 2 / gamma2
 
         # compute distance of -grad f to subdifferential of MCP penalty
-        grad = self.X.T @ diff
+        grad = self.X.T @ diff / len(self.y)
         opt = subdiff_distance(beta, grad, self.lmbd, self.gamma)
 
-        return dict(value=0.5 * diff @ diff + pen.sum(),
+        return dict(value=0.5 * diff @ diff / len(self.y) + pen.sum(),
                     sparsity=(beta != 0).sum(), opt=opt.max())
 
     def _get_lambda_max(self):
-        return abs(self.X.T @ self.y).max()
+        return abs(self.X.T @ self.y).max() / len(self.y)
 
     def to_dict(self):
         return dict(X=self.X, y=self.y, lmbd=self.lmbd, gamma=self.gamma)

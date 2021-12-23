@@ -25,11 +25,11 @@ class Dataset(BaseDataset):
         self.rho = rho
 
     def get_data(self):
-        rng = np.random.RandomState(self.random_state)
-
-        X, y, _ = make_correlated_data(self.n_samples, self.n_features,
-                                       rho=self.rho, random_state=rng)
-
-        X /= np.linalg.norm(X, axis=0)
+        X, y, _ = make_correlated_data(
+            self.n_samples, self.n_features,
+            rho=self.rho, random_state=self.random_state
+        )
+        if self.scale:
+            X /= np.linalg.norm(X, axis=0) / np.sqrt(len(self.y))
         data = dict(X=X, y=y)
         return self.n_features, data
