@@ -33,15 +33,15 @@ class Solver(BaseSolver):
         self.lmbd, self.gamma = lmbd, gamma
 
         # cache the numba compilation.
-        self.run(1)
+        self.run(2)
 
     def run(self, n_iter):
         # how to set n_iter for benchopt, on outer iterations or inner ?
         self.w = self.reweighted(self.X, self.y, self.lmbd, self.gamma,
-                                 n_iter=n_iter, n_iter_weighted=5)
+                                 n_iter=n_iter, n_iter_weighted=15)
 
     @staticmethod
-    def reweighted(X, y, lmbd, gamma, n_iter, n_iter_weighted=5):
+    def reweighted(X, y, lmbd, gamma, n_iter, n_iter_weighted):
         # First weights is equivalent to a simple Lasso
         weights = lmbd * np.ones(X.shape[1])
         clf = WeightedLasso(alpha=1, tol=1e-12,
