@@ -15,7 +15,7 @@ class Dataset(BaseDataset):
         "n_samples, n_features": [
             (100, 200),
         ],
-        "scale": [True, False],
+        "scale": [True],
     }
 
     def __init__(self, n_samples=10, n_features=50, scale=False):
@@ -26,7 +26,6 @@ class Dataset(BaseDataset):
         self.random_state = 0
 
     def get_data(self):
-
         X, y, _ = make_correlated_data(
             self.n_samples, self.n_features, random_state=self.random_state)
         if self.scale:
