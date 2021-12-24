@@ -38,7 +38,7 @@ class Solver(BaseSolver):
     def run(self, n_iter):
         # how to set n_iter for benchopt, on outer iterations or inner ?
         self.w = self.reweighted(self.X, self.y, self.lmbd, self.gamma,
-                                 n_iter=n_iter, n_iter_weighted=15)
+                                 n_iter=n_iter, n_iter_weighted=30)
 
     @staticmethod
     def reweighted(X, y, lmbd, gamma, n_iter, n_iter_weighted):
@@ -49,8 +49,7 @@ class Solver(BaseSolver):
                             weights=weights, max_iter=n_iter,
                             warm_start=True)
         for _ in range(n_iter_weighted):
-            penalty = WeightedL1(1, weights)
-            clf.penalty = penalty
+            clf.penalty.weights = weights
             clf.fit(X, y)
             # Update weights as derivative of MCP penalty
             weights = deriv_mcp(clf.coef_, lmbd, gamma)
