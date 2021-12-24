@@ -38,7 +38,7 @@ class Solver(BaseSolver):
     def run(self, n_iter):
         # how to set n_iter for benchopt, on outer iterations or inner ?
         self.w = self.reweighted(self.X, self.y, self.lmbd, self.gamma,
-                                 n_iter=n_iter, n_iter_weighted=30)
+                                 n_iter=n_iter, n_iter_weighted=40)
 
     @staticmethod
     def reweighted(X, y, lmbd, gamma, n_iter, n_iter_weighted):
