@@ -1,5 +1,5 @@
 from benchopt import BaseDataset, safe_import_context
-
+from benchopt.datasets import make_correlated_data
 
 with safe_import_context() as import_ctx:
     import numpy as np
@@ -27,9 +27,8 @@ class Dataset(BaseDataset):
 
     def get_data(self):
 
-        rng = np.random.RandomState(self.random_state)
-        X = rng.randn(self.n_samples, self.n_features)
-        y = rng.randn(self.n_samples)
+        X, y, _ = make_correlated_data(
+            self.n_samples, self.n_features, random_state=self.random_state)
         if self.scale:
             X /= np.linalg.norm(X, axis=0) / np.sqrt(len(y))
         data = dict(X=X, y=y)
