@@ -4,7 +4,6 @@ with safe_import_context() as import_ctx:
     import numpy as np
     from numba import njit
     from flashcd.estimators import WeightedLasso
-    from flashcd.penalties import WeightedL1
 
 if import_ctx.failed_import:
 
@@ -38,7 +37,7 @@ class Solver(BaseSolver):
     def run(self, n_iter):
         # how to set n_iter for benchopt, on outer iterations or inner ?
         self.w = self.reweighted(self.X, self.y, self.lmbd, self.gamma,
-                                 n_iter=n_iter, n_iter_weighted=30)
+                                 n_iter=n_iter, n_iter_weighted=500)
 
     @staticmethod
     def reweighted(X, y, lmbd, gamma, n_iter, n_iter_weighted):
@@ -52,7 +51,10 @@ class Solver(BaseSolver):
             clf.penalty.weights = weights
             clf.fit(X, y)
             # Update weights as derivative of MCP penalty
+            old_weights = weights
             weights = deriv_mcp(clf.coef_, lmbd, gamma)
+            if np.linalg.norm(old_weights - weights) < 1e-12:
+                break
         return clf.coef_
 
     def get_result(self):
