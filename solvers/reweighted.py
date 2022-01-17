@@ -4,7 +4,8 @@ with safe_import_context() as import_ctx:
     import numpy as np
     from numba import njit
     from flashcd.estimators import WeightedLasso
-    from flashcd.penalties import WeightedL1
+    # from flashcd.penalties import WeightedL1
+    # from scipy.sparse import issparse
 
 if import_ctx.failed_import:
 
@@ -29,7 +30,7 @@ class Solver(BaseSolver):
     ]
 
     def set_objective(self, X, y, lmbd, gamma):
-        self.X, self.y = np.asfortranarray(X), y
+        self.X, self.y = X, y
         self.lmbd, self.gamma = lmbd, gamma
 
         # cache the numba compilation.
