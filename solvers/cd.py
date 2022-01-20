@@ -86,15 +86,16 @@ class Solver(BaseSolver):
         w = np.zeros(n_features)
         for _ in range(n_iter):
             for j in range(n_features):
-                old = w[j]
-                w[j] = prox_mcp(
-                    w[j] + X[:, j] @ R / (lipschitz[j] * n_samples),
-                    lmbd / lipschitz[j],
-                    gamma * lipschitz[j],
-                )
-                diff = old - w[j]
-                if diff != 0:
-                    R += diff * X[:, j]
+                if lipschitz[j]:
+                    old = w[j]
+                    w[j] = prox_mcp(
+                        w[j] + X[:, j] @ R / (lipschitz[j] * n_samples),
+                        lmbd / lipschitz[j],
+                        gamma * lipschitz[j],
+                    )
+                    diff = old - w[j]
+                    if diff != 0:
+                        R += diff * X[:, j]
         return w
 
     @staticmethod
@@ -107,18 +108,18 @@ class Solver(BaseSolver):
         R = np.copy(y)
         for _ in range(n_iter):
             for j in range(n_features):
-                old = w[j]
-                XjtR = 0.0
-                for ind in range(X_indptr[j], X_indptr[j + 1]):
-                    XjtR += X_data[ind] * R[X_indices[ind]]
-
-                w[j] = prox_mcp(w[j] + XjtR / (lipschitz[j] * n_samples),
-                                lmbd / lipschitz[j],
-                                gamma * lipschitz[j])
-                diff = old - w[j]
-                if diff != 0:
+                if lipschitz[j]:
+                    old = w[j]
+                    XjtR = 0.0
                     for ind in range(X_indptr[j], X_indptr[j + 1]):
-                        R[X_indices[ind]] += diff * X_data[ind]
+                        XjtR += X_data[ind] * R[X_indices[ind]]
+
+                    w[j] = prox_mcp(w[j] + XjtR / (lipschitz[j] * n_samples),
+                                    lmbd / lipschitz[j], gamma * lipschitz[j])
+                    diff = old - w[j]
+                    if diff != 0:
+                        for ind in range(X_indptr[j], X_indptr[j + 1]):
+                            R[X_indices[ind]] += diff * X_data[ind]
         return w
 
     def get_result(self):
