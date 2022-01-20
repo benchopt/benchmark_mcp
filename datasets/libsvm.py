@@ -8,6 +8,7 @@ with safe_import_context() as import_ctx:
     from scipy.sparse import issparse
     import numpy as np
     from scipy.linalg import norm
+    from sklean.preprocessing import normalize
 
 
 class Dataset(BaseDataset):
@@ -32,13 +33,8 @@ class Dataset(BaseDataset):
         if self.X is None:
             self.X, self.y = fetch_libsvm(self.dataset)
 
-        if issparse(self.X):
-            self.X.multiply(
-                np.sqrt(len(self.y)) / np.sqrt(self.X.power(2).sum(axis=0)))
-        else:
-            self.X = np.array(self.X)
-            self.X /= np.linalg.norm(self.X, axis=0)
-            self.X *= np.sqrt(len(self.y))
+        normalize(self.X, axis=0, copy=False)
+        self.X *= np.sqrt(len(self.y))
 
         data = dict(X=self.X, y=self.y)
 
