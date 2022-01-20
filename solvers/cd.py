@@ -46,8 +46,7 @@ class Solver(BaseSolver):
     ]
 
     def set_objective(self, X, y, lmbd, gamma):
-        # use Fortran order to compute gradient on contiguous columns
-        self.X, self.y = np.asfortranarray(X), y
+        self.X, self.y = X, y
         self.lmbd, self.gamma = lmbd, gamma
 
         # Make sure we cache the numba compilation.
