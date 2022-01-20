@@ -5,6 +5,9 @@ from benchopt import safe_import_context
 
 with safe_import_context() as import_ctx:
     from libsvmdata import fetch_libsvm
+    from scipy.sparse import issparse
+    import numpy as np
+    from scipy.linalg import norm
 
 
 class Dataset(BaseDataset):
@@ -12,7 +15,9 @@ class Dataset(BaseDataset):
     name = "libsvm"
 
     parameters = {
-        'dataset': ["bodyfat", "leukemia", "news20.binary", "rcv1.binary"],
+        'dataset': [
+            "bodyfat", "leukemia", "news20.binary", "rcv1.binary", "finance",
+            "real-sim"],
     }
 
     install_cmd = 'conda'
@@ -26,6 +31,11 @@ class Dataset(BaseDataset):
 
         if self.X is None:
             self.X, self.y = fetch_libsvm(self.dataset)
+
+        if issparse(self.X):
+            pass
+        else:
+            self.X = np.array(self.X)
 
         data = dict(X=self.X, y=self.y)
 

@@ -9,7 +9,8 @@ class Solver(BaseSolver):
     name = "flashcd"
 
     def set_objective(self, X, y, lmbd, gamma):
-        self.X, self.y = np.asfortranarray(X), y
+        # self.X, self.y = np.asfortranarray(X), y
+        self.X, self.y = X, y
         self.lmbd, self.gamma = lmbd, gamma
         self.clf = MCP(alpha=lmbd, gamma=gamma,
                        fit_intercept=False)
