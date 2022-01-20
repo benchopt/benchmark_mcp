@@ -79,15 +79,16 @@ class Solver(BaseSolver):
         w = np.zeros(n_features)
         for _ in range(n_iter):
             for j in range(n_features):
-                old = w[j]
-                w[j] = prox_mcp(
-                    w[j] + X[:, j] @ R / (lipschitz[j] * n_samples),
-                    lmbd / lipschitz[j],
-                    gamma * lipschitz[j],
-                )
-                diff = old - w[j]
-                if diff != 0:
-                    R += diff * X[:, j]
+                if lipschitz[j] != 0:
+                    old = w[j]
+                    w[j] = prox_mcp(
+                        w[j] + X[:, j] @ R / (lipschitz[j] * n_samples),
+                        lmbd / lipschitz[j],
+                        gamma * lipschitz[j],
+                    )
+                    diff = old - w[j]
+                    if diff != 0:
+                        R += diff * X[:, j]
         return w
 
     @staticmethod
