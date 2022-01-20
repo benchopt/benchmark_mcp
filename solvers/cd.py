@@ -34,6 +34,18 @@ def prox_mcp(x, lmbd, gamma):
     return gamma / (gamma - 1) * st(x, lmbd)
 
 
+@njit
+def norm_col_sparse(data, indptr):
+    n_features = len(indptr) - 1
+    norms = np.zeros(n_features)
+    for j in range(n_features):
+        tmp = 0
+        for idx in range(indptr[j], indptr[j + 1]):
+            tmp += data[idx] ** 2
+        norms[j] = np.sqrt(tmp)
+    return norms
+
+
 class Solver(BaseSolver):
     name = "cd"
     install_cmd = "conda"
@@ -53,16 +65,12 @@ class Solver(BaseSolver):
         self.run(1)
 
     def run(self, n_iter):
-        if sparse.issparse(self.X):
-            # TODO this only works when the lipschitz constants are 1
+        X = self.X
+        if sparse.issparse(X):
+            lipschitz = norm_col_sparse(X.data, X.indptr) ** 2 / len(self.y)
             self.w = self.sparse_cd(
-                self.X.data,
-                self.X.indices,
-                self.X.indptr,
-                self.y,
-                self.lmbd,
-                self.gamma,
-                n_iter,
+                X.data, X.indices, X.indptr, self.y, self.lmbd, self.gamma,
+                lipschitz, n_iter,
             )
         else:
             lipschitz = np.sum(self.X ** 2, axis=0) / len(self.y)
@@ -91,7 +99,8 @@ class Solver(BaseSolver):
 
     @staticmethod
     @njit
-    def sparse_cd(X_data, X_indices, X_indptr, y, lmbd, gamma, n_iter):
+    def sparse_cd(
+            X_data, X_indices, X_indptr, y, lmbd, gamma, lipschitz, n_iter):
         n_features = len(X_indptr) - 1
         n_samples = len(y)
         w = np.zeros(n_features)
@@ -99,11 +108,13 @@ class Solver(BaseSolver):
         for _ in range(n_iter):
             for j in range(n_features):
                 old = w[j]
-                grad = 0.0
+                XjtR = 0.0
                 for ind in range(X_indptr[j], X_indptr[j + 1]):
-                    grad += X_data[ind] * R[X_indices[ind]]
+                    XjtR += X_data[ind] * R[X_indices[ind]]
 
-                w[j] = prox_mcp(w[j] + grad / n_samples, lmbd, gamma)
+                w[j] = prox_mcp(w[j] + XjtR / (lipschitz[j] * n_samples),
+                                lmbd / lipschitz[j],
+                                gamma * lipschitz[j])
                 diff = old - w[j]
                 if diff != 0:
                     for ind in range(X_indptr[j], X_indptr[j + 1]):
