@@ -3,13 +3,14 @@ from benchopt import BaseObjective
 
 
 def subdiff_distance(w, grad, lmbd, gamma):
+    """Distance of negative gradient to Fréchet subdifferential of MCP at w."""
     subdiff_dist = np.zeros_like(grad)
     for j in range(len(w)):
         if w[j] == 0:
-            # distance of grad to alpha * [-1, 1]
+            # distance of grad to [-lmbd, lmbd]
             subdiff_dist[j] = max(0, np.abs(grad[j]) - lmbd)
         elif np.abs(w[j]) < lmbd * gamma:
-            # distance of grad_j to (alpha - abs(w[j])/gamma) * sign(w[j])
+            # distance of grad_j to (lmbd - abs(w[j])/gamma) * sign(w[j])
             subdiff_dist[j] = np.abs(
                 -grad[j] + lmbd * np.sign(w[j]) - w[j] / gamma)
         else:
@@ -43,7 +44,7 @@ class Objective(BaseObjective):
         opt = subdiff_distance(beta, grad, self.lmbd, self.gamma)
 
         return dict(value=0.5 * diff @ diff / len(self.y) + pen.sum(),
-                    sparsity=(beta != 0).sum(), opt=opt.max())
+                    sparsity=(beta != 0).sum(), opt_violation=opt.max())
 
     def _get_lambda_max(self):
         return abs(self.X.T @ self.y).max() / len(self.y)
