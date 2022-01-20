@@ -33,9 +33,12 @@ class Dataset(BaseDataset):
             self.X, self.y = fetch_libsvm(self.dataset)
 
         if issparse(self.X):
-            pass
+            self.X.multiply(
+                np.sqrt(len(self.y)) / np.sqrt(self.X.power(2).sum(axis=0)))
         else:
             self.X = np.array(self.X)
+            self.X /= np.linalg.norm(self.X, axis=0)
+            self.X *= np.sqrt(len(self.y))
 
         data = dict(X=self.X, y=self.y)
 
