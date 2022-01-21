@@ -36,7 +36,7 @@ class Objective(BaseObjective):
         self.lmbd = self.reg * self._get_lambda_max()
 
     def compute(self, beta):
-        diff = self.y - self.X @ beta
+        diff = self.X @ beta - self.y
         pen = (self.lmbd ** 2 * self.gamma / 2.) * np.ones(beta.shape)
         idx = np.abs(beta) <= self.gamma * self.lmbd
         gamma2 = self.gamma * 2

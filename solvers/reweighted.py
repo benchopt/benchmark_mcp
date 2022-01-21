@@ -29,6 +29,8 @@ class Solver(BaseSolver):
         "vol. 14, pp. 877-905 (2008)"
     ]
 
+    parameters = {"n_reweightings": [5, 10, 20, 40]}
+
     def set_objective(self, X, y, lmbd, gamma):
         self.X, self.y = X, y
         self.lmbd, self.gamma = lmbd, gamma
@@ -38,18 +40,22 @@ class Solver(BaseSolver):
 
     def run(self, n_iter):
         # how to set n_iter for benchopt, on outer iterations or inner ?
-        self.w = self.reweighted(self.X, self.y, self.lmbd, self.gamma,
-                                 n_iter=n_iter, n_iter_weighted=40)
+        self.w = self.reweighted(
+            self.X, self.y, self.lmbd, self.gamma, n_iter=n_iter,
+            n_reweightings=self.n_reweightings)
 
     @staticmethod
-    def reweighted(X, y, lmbd, gamma, n_iter, n_iter_weighted):
+    def reweighted(X, y, lmbd, gamma, n_iter, n_reweightings):
         # First weights is equivalent to a simple Lasso
+        if n_iter == 0:
+            return np.zeros(X.shape[1])
+
         weights = lmbd * np.ones(X.shape[1])
         clf = WeightedLasso(alpha=1, tol=1e-12,
                             fit_intercept=False,
                             weights=weights, max_iter=n_iter,
                             warm_start=True)
-        for _ in range(n_iter_weighted):
+        for _ in range(n_reweightings):
             clf.penalty.weights = weights
             clf.fit(X, y)
             # Update weights as derivative of MCP penalty
