@@ -18,13 +18,14 @@ class Dataset(BaseDataset):
     parameters = {
         'dataset': [
             "bodyfat", "leukemia", "news20.binary", "rcv1.binary", "finance",
-            "real-sim"],
+            "real-sim"]
     }
 
     install_cmd = 'conda'
     requirements = ['pip:libsvmdata']
 
     def __init__(self, dataset="bodyfat"):
+        # import ipdb; ipdb.set_trace()
         self.dataset = dataset
         self.X, self.y = None, None
 
