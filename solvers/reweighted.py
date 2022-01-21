@@ -4,8 +4,6 @@ with safe_import_context() as import_ctx:
     import numpy as np
     from numba import njit
     from flashcd.estimators import WeightedLasso
-    # from flashcd.penalties import WeightedL1
-    # from scipy.sparse import issparse
 
 if import_ctx.failed_import:
 
