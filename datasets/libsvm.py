@@ -8,7 +8,7 @@ with safe_import_context() as import_ctx:
     from scipy.sparse import issparse
     import numpy as np
     from scipy.linalg import norm
-    from sklean.preprocessing import normalize
+    from sklearn.preprocessing import normalize
 
 
 class Dataset(BaseDataset):
@@ -18,13 +18,14 @@ class Dataset(BaseDataset):
     parameters = {
         'dataset': [
             "bodyfat", "leukemia", "news20.binary", "rcv1.binary", "finance",
-            "real-sim"],
+            "real-sim"]
     }
 
     install_cmd = 'conda'
     requirements = ['pip:libsvmdata']
 
     def __init__(self, dataset="bodyfat"):
+        # import ipdb; ipdb.set_trace()
         self.dataset = dataset
         self.X, self.y = None, None
 
