@@ -14,26 +14,27 @@ X /= np.linalg.norm(X, axis=0) / np.sqrt(len(y))
 
 
 alpha_max = norm(X.T @ y, ord=np.inf) / len(y)
-lmbd = 0.01 * alpha_max
-gamma = 300
+lmbd = 0.0001 * alpha_max
+gamma = 20
 
 
-def reweighted(X, y, lmbd, gamma, n_iter, n_reweightings=10):
-    # First weights is equivalent to a simple Lasso
-    if n_iter == 0:
-        return np.zeros(X.shape[1])
+# def reweighted(X, y, lmbd, gamma, n_iter, n_reweightings=11):
+#     # First weights is equivalent to a simple Lasso
+#     if n_iter == 0:
+#         return np.zeros(X.shape[1])
 
-    weights = lmbd * np.ones(X.shape[1])
-    clf = WeightedLasso(alpha=1, tol=1e-12,
-                        fit_intercept=False,
-                        weights=weights, max_iter=n_iter,
-                        warm_start=True)
-    for _ in range(n_reweightings):
-        clf.penalty.weights = weights
-        clf.fit(X, y)
-        # Update weights as derivative of MCP penalty
-        weights = deriv_mcp(clf.coef_, lmbd, gamma)
-    return clf.coef_
+#     weights = lmbd * np.ones(X.shape[1])
+#     clf = WeightedLasso(alpha=1, tol=1e-12,
+#                         fit_intercept=False,
+#                         weights=weights, max_iter=n_iter,
+#                         warm_start=True, verbose=1)
+#     for _ in range(n_reweightings):
+#         clf.penalty.weights = weights
+#         old_weights = weights.copy()
+#         clf.fit(X, y)
+#         # Update weights as derivative of MCP penalty
+#         weights = deriv_mcp(clf.coef_, lmbd, gamma)
+#     return clf.coef_
 
 
 def mcp_val(w):
@@ -72,7 +73,22 @@ def subdiff_distance(w, grad, lmbd, gamma):
     return subdiff_dist
 
 
-w = reweighted(X, y, lmbd, gamma, n_iter=1000)
+# w = reweighted(X, y, lmbd, gamma, n_iter=1000)*
+n_iter = 1000
+weights = lmbd * np.ones(X.shape[1])
+clf = WeightedLasso(alpha=1, tol=1e-12,
+                    fit_intercept=False,
+                    weights=weights, max_iter=n_iter,
+                    warm_start=True, verbose=0)
+for _ in range(50):
+    clf.penalty.weights = weights
+    old_weights = weights.copy()
+    clf.fit(X, y)
+    # Update weights as derivative of MCP penalty
+    print(weights[125])
+    weights = deriv_mcp(clf.coef_, lmbd, gamma)
+
+w = clf.coef_
 R = X @ w - y
 
 grad = X.T @ (X @ w - y) / len(y)
