@@ -10,9 +10,9 @@ def subdiff_distance(w, grad, lmbd, gamma):
             # distance of grad to [-lmbd, lmbd]
             subdiff_dist[j] = max(0, np.abs(grad[j]) - lmbd)
         elif np.abs(w[j]) < lmbd * gamma:
-            # distance of grad_j to (lmbd - abs(w[j])/gamma) * sign(w[j])
+            # distance of -grad_j to (lmbd - abs(w[j])/gamma) * sign(w[j])
             subdiff_dist[j] = np.abs(
-                -grad[j] + lmbd * np.sign(w[j]) - w[j] / gamma)
+                grad[j] + lmbd * np.sign(w[j]) - w[j] / gamma)
         else:
             # distance of grad to 0
             subdiff_dist[j] = np.abs(grad[j])

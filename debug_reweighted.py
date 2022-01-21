@@ -15,7 +15,7 @@ X /= np.linalg.norm(X, axis=0) / np.sqrt(len(y))
 
 alpha_max = norm(X.T @ y, ord=np.inf) / len(y)
 lmbd = 0.01 * alpha_max
-gamma = 3
+gamma = 300
 
 
 def reweighted(X, y, lmbd, gamma, n_iter, n_reweightings=10):
@@ -43,16 +43,16 @@ def mcp_val(w):
     return pen.sum()
 
 
-E = []
-for n_iter in range(10):
-    w = reweighted(X, y, lmbd, gamma, n_iter)
-    R = X @ w - y
-    obj = norm(R) ** 2 / (2 * len(R)) + mcp_val(w)
-    E.append(obj)
+# E = []
+# for n_iter in range(1000,1001):
+#     w = reweighted(X, y, lmbd, gamma, n_iter)
+#     R = X @ w - y
+#     obj = norm(R) ** 2 / (2 * len(R)) + mcp_val(w)
+#     E.append(obj)
 
-E = np.array(E)
-plt.semilogy(E - np.min(E))
-plt.show(block=False)
+# E = np.array(E)
+# plt.semilogy(E - np.min(E))
+# plt.show(block=False)
 
 
 def subdiff_distance(w, grad, lmbd, gamma):
@@ -63,14 +63,17 @@ def subdiff_distance(w, grad, lmbd, gamma):
             # distance of grad to [-lmbd, lmbd]
             subdiff_dist[j] = max(0, np.abs(grad[j]) - lmbd)
         elif np.abs(w[j]) < lmbd * gamma:
-            # distance of grad_j to (lmbd - abs(w[j])/gamma) * sign(w[j])
+            # distance of -grad_j to (lmbd - abs(w[j])/gamma) * sign(w[j])
             subdiff_dist[j] = np.abs(
-                -grad[j] + lmbd * np.sign(w[j]) - w[j] / gamma)
+                grad[j] + lmbd * np.sign(w[j]) - w[j] / gamma)
         else:
             # distance of grad to 0
             subdiff_dist[j] = np.abs(grad[j])
     return subdiff_dist
 
+
+w = reweighted(X, y, lmbd, gamma, n_iter=1000)
+R = X @ w - y
 
 grad = X.T @ (X @ w - y) / len(y)
 
