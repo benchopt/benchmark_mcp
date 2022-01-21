@@ -8,7 +8,7 @@ with safe_import_context() as import_ctx:
     from scipy.sparse import issparse
     import numpy as np
     from scipy.linalg import norm
-    from sklean.preprocessing import normalize
+    from sklearn.preprocessing import normalize
 
 
 class Dataset(BaseDataset):
