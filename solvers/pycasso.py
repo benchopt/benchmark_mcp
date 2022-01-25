@@ -13,8 +13,9 @@ class Solver(BaseSolver):
         self.X, self.y = X, y
         self.lmbd, self.gamma = lmbd, gamma
         lmbd_max = norm(X.T @ y, ord=np.inf) / len(y)
+        lambdas = (2, lmbd / lmbd_max)  # (len_path, min_ratio)
         self.clf = pycasso.Solver(
-            X, y, lambdas=(1, lmbd / lmbd_max), penalty="mcp", gamma=gamma,
+            X, y, lambdas=lambdas, penalty="mcp", gamma=gamma,
             useintercept=False, family="gaussian")
         # warning: pycasso fits an intercept even when useintercept=False
 
