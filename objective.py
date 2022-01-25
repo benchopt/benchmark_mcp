@@ -7,14 +7,14 @@ def subdiff_distance(w, grad, lmbd, gamma):
     subdiff_dist = np.zeros_like(grad)
     for j in range(len(w)):
         if w[j] == 0:
-            # distance of grad to [-lmbd, lmbd]
+            # distance of -grad to [-lmbd, lmbd]
             subdiff_dist[j] = max(0, np.abs(grad[j]) - lmbd)
         elif np.abs(w[j]) < lmbd * gamma:
-            # distance of grad_j to (lmbd - abs(w[j])/gamma) * sign(w[j])
+            # distance of -grad to (lmbd - abs(w[j])/gamma) * sign(w[j])
             subdiff_dist[j] = np.abs(
-                -grad[j] + lmbd * np.sign(w[j]) - w[j] / gamma)
+                grad[j] + lmbd * np.sign(w[j]) - w[j] / gamma)
         else:
-            # distance of grad to 0
+            # distance of -grad to 0
             subdiff_dist[j] = np.abs(grad[j])
     return subdiff_dist
 
@@ -33,7 +33,7 @@ class Objective(BaseObjective):
         self.lmbd = self.reg * self._get_lambda_max()
 
     def compute(self, beta):
-        diff = self.y - self.X @ beta
+        diff = self.X @ beta - self.y
         pen = (self.lmbd ** 2 * self.gamma / 2.) * np.ones(beta.shape)
         idx = np.abs(beta) <= self.gamma * self.lmbd
         gamma2 = self.gamma * 2
