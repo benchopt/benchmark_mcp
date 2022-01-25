@@ -36,9 +36,9 @@ class Objective(BaseObjective):
         diff = self.X @ beta - self.y
         pen = (self.lmbd ** 2 * self.gamma / 2.) * np.ones(beta.shape)
         idx = np.abs(beta) <= self.gamma * self.lmbd
-        gamma2 = self.gamma * 2
-        pen[idx] = self.lmbd * np.abs(beta[idx]) - beta[idx] ** 2 / gamma2
-
+        pen[idx] = (
+            self.lmbd * np.abs(beta[idx]) - beta[idx] ** 2 / (2 * self.gamma)
+        )
         # compute distance of -grad f to subdifferential of MCP penalty
         grad = self.X.T @ diff / len(self.y)
         opt = subdiff_distance(beta, grad, self.lmbd, self.gamma)
