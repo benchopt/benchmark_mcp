@@ -9,6 +9,9 @@ with safe_import_context() as import_ctx:
 class Solver(BaseSolver):
     name = "pycasso"
 
+    install_cmd = 'conda'
+    requirements = ['pip:pycasso']
+
     def set_objective(self, X, y, lmbd, gamma):
         self.X, self.y = X, y
         self.lmbd, self.gamma = lmbd, gamma
@@ -26,4 +29,4 @@ class Solver(BaseSolver):
         self.clf.train()
 
     def get_result(self):
-        return self.clf.coef()['beta'].flatten()
+        return self.clf.coef()['beta'][1]
