@@ -16,6 +16,7 @@ class Solver(BaseSolver):
         self.clf = pycasso.Solver(
             X, y, lambdas=(1, lmbd / lmbd_max), penalty="mcp", gamma=gamma,
             useintercept=False, family="gaussian")
+        # warning: pycasso fits an intercept even when useintercept=False
 
         self.clf.prec = 1e-12
 
