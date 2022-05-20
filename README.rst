@@ -29,14 +29,14 @@ This benchmark can be run using the following commands:
    $ git clone https://github.com/benchopt/benchmark_mcp
    $ benchopt run ./benchmark_mcp
 
-Apart from the problem, options can be passed to `benchopt run`, to restrict the benchmarks to some solvers or datasets, e.g.:
+Apart from the problem, options can be passed to ``benchopt run``, to restrict the benchmarks to some solvers or datasets, e.g.:
 
 .. code-block::
 
 	$ benchopt run ./benchmark_mcp -s cd -d simulated --max-runs 10 --n-repetitions 5
 
 
-Use `benchopt run -h` for more details about these options, or visit https://benchopt.github.io/cli.html.
+Use ``benchopt run -h`` for more details about these options, or visit https://benchopt.github.io/cli.html.
 
 .. |Build Status| image:: https://github.com/benchopt/benchmark_mcp/workflows/Tests/badge.svg
    :target: https://github.com/benchopt/benchmark_mcp/actions
