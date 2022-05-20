@@ -13,10 +13,10 @@ with the penalty
 
 $$ \\rho_{\\lambda, \\gamma} (t) = \\begin{cases} \\lambda \\vert t \\vert - \\frac{t^2}{2\\gamma} & , & \\text{ if }  \\vert t \\vert \\ \\leq \\ \\gamma \\lambda \\\\ \\frac{\\lambda^2 \\gamma}{2} & , & \\text{ if } \\vert t \\vert \\ > \\ \\gamma \\lambda \\end{cases}$$
 
-where n (or n_samples) stands for the number of samples, p (or n_features) stands for the number of features and
+where $n$ (or ``n_samples``) stands for the number of samples, $p$ (or ``n_features``) stands for the number of features and
 
 
-$$y \\in \\mathbb{R}^n, X = [x_1^\\top, \\dots, x_n^\\top]^\\top \\in \\mathbb{R}^{n \\times p}$$
+$$y \\in \\mathbb{R}^n, \\ X = [x_1^\\top, \\dots, x_n^\\top]^\\top \\in \\mathbb{R}^{n \\times p}$$
 
 Install
 --------
