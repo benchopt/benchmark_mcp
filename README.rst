@@ -7,17 +7,16 @@ BenchOpt is a package to simplify and make more transparent and
 reproducible the comparisons of optimization algorithms.
 Regression with the Minimax Concave Penalty (MCP) consists in solving the following program:
 
-$$\\min_w \\frac{1}{2 n} \\Vert y - Xw \\Vert^2_2 + \\sum_j \\rho_{\\lambda, \\gamma}(w_j)$$
+$$\\min_w \\frac{1}{2 n} \\Vert y - Xw \\Vert^2_2 \\ + \\ \\sum_j \\rho_{\\lambda, \\gamma}(w_j)$$
 
 with the penalty
 
-$$ \\rho_{\\lambda, \\gamma} = \\begin{cases} \\lambda \\vert t \\vert - \\frac{t^2}{2\\gamma} & , & \\text{ if }  \\vert t \\vert \\leq \\gamma \\lambda \\\\ \\frac{\\lambda^2 \\gamma}{2} & , & \\text{ if } \\vert t \\vert > \\gamma \\lambda \\end{cases}$$
+$$ \\rho_{\\lambda, \\gamma} (t) = \\begin{cases} \\lambda \\vert t \\vert - \\frac{t^2}{2\\gamma} & , & \\text{ if }  \\vert t \\vert \\ \\leq \\ \\gamma \\lambda \\\\ \\frac{\\lambda^2 \\gamma}{2} & , & \\text{ if } \\vert t \\vert \\ > \\ \\gamma \\lambda \\end{cases}$$
 
 where n (or n_samples) stands for the number of samples, p (or n_features) stands for the number of features and
 
-.. math::
 
- y \in \mathbb{R}^n, X = [x_1^\top, \dots, x_n^\top]^\top \in \mathbb{R}^{n \times p}
+$$y \\in \\mathbb{R}^n, X = [x_1^\\top, \\dots, x_n^\\top]^\\top \\in \\mathbb{R}^{n \\times p}$$
 
 Install
 --------
