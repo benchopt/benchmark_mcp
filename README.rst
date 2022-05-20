@@ -15,7 +15,7 @@ $$ \\rho_{\\lambda, \\gamma} =
 \\begin{cases}
 & \\lambda | t | - \\frac{t^2}{2\\gamma} & \\text{ if } |t| \\leq \\gamma \\lambda \\\\
 & \\lambda & \\text{ if } |t| > 0
-\\end{cases}$$
+\\end{cases}
 $$
 
 where n (or n_samples) stands for the number of samples, p (or n_features) stands for the number of features and
