@@ -13,8 +13,8 @@ with the penalty
 
 $$ \\rho_{\\lambda, \\gamma} =
 \\begin{cases}
- \\lambda | t | - \\frac{t^2}{2\\gamma} & , & \\text{ if }  |t|\\leq \\gamma \\lambda \\\\
-  \\frac{\\lambda^2 \\gamma}{2} & , & \\text{ if } |t| > \\gamma \\lambda
+ \\lambda \\vert t \\vert - \\frac{t^2}{2\\gamma} & , & \\text{ if }  \\vert t \\vert \\leq \\gamma \\lambda \\\\
+  \\frac{\\lambda^2 \\gamma}{2} & , & \\text{ if } \\vert t \\vert > \\gamma \\lambda
 \\end{cases}
 $$
 
