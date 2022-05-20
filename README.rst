@@ -7,7 +7,7 @@ BenchOpt is a package to simplify and make more transparent and
 reproducible the comparisons of optimization algorithms.
 Regression with the Minimax Concave Penalty (MCP) consists in solving the following program:
 
-$$\min_w \frac{1}{2 n} \\Vert y - Xw \\Vert^2_2 + \sum_j \rho_{\lambda, \gamma}(w_j)$$
+$$\\min_w \\frac{1}{2 n} \\Vert y - Xw \\Vert^2_2 + \\sum_j \\rho_{\\lambda, \\gamma}(w_j)$$
 
 with the penalty
 
