@@ -7,17 +7,16 @@ BenchOpt is a package to simplify and make more transparent and
 reproducible the comparisons of optimization algorithms.
 Regression with the Minimax Concave Penalty (MCP) consists in solving the following program:
 
-.. image:: images/objective.png
+$$\\min_w \\frac{1}{2 n} \\Vert y - Xw \\Vert^2_2 \\ + \\ \\sum_j \\rho_{\\lambda, \\gamma}(w_j)$$
 
 with the penalty
 
-.. image:: images/penalty.png
+$$ \\rho_{\\lambda, \\gamma} (t) = \\begin{cases} \\lambda \\vert t \\vert - \\frac{t^2}{2\\gamma} & , & \\text{ if }  \\vert t \\vert \\ \\leq \\ \\gamma \\lambda \\\\ \\frac{\\lambda^2 \\gamma}{2} & , & \\text{ if } \\vert t \\vert \\ > \\ \\gamma \\lambda \\end{cases}$$
 
-where n (or n_samples) stands for the number of samples, p (or n_features) stands for the number of features and
+where $n$ (or ``n_samples``) stands for the number of samples, $p$ (or ``n_features``) stands for the number of features and
 
-.. math::
 
- y \in \mathbb{R}^n, X = [x_1^\top, \dots, x_n^\top]^\top \in \mathbb{R}^{n \times p}
+$$y \\in \\mathbb{R}^n, \\ X \\in \\mathbb{R}^{n \\times p}$$
 
 Install
 --------
@@ -28,16 +27,17 @@ This benchmark can be run using the following commands:
 
    $ pip install -U benchopt
    $ git clone https://github.com/benchopt/benchmark_mcp
-   $ benchopt run ./benchmark_mcp
+   $ cd benchmark_mcp/
+   $ benchopt run .
 
-Apart from the problem, options can be passed to `benchopt run`, to restrict the benchmarks to some solvers or datasets, e.g.:
+Apart from the problem, options can be passed to ``benchopt run``, to restrict the benchmarks to some solvers or datasets, e.g.:
 
 .. code-block::
 
-	$ benchopt run ./benchmark_mcp -s cd -d simulated --max-runs 10 --n-repetitions 5
+	$ benchopt run . -s cd -d simulated --max-runs 10 --n-repetitions 5
 
 
-Use `benchopt run -h` for more details about these options, or visit https://benchopt.github.io/cli.html.
+Use ``benchopt run -h`` for more details about these options, or visit https://benchopt.github.io/cli.html.
 
 .. |Build Status| image:: https://github.com/benchopt/benchmark_mcp/workflows/Tests/badge.svg
    :target: https://github.com/benchopt/benchmark_mcp/actions
