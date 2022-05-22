@@ -27,7 +27,7 @@ class Solver(BaseSolver):
         self.lmbd, self.gamma = lmbd, gamma
 
         self.model = MCPRegression(
-            alpha=lmbd, gamma=gamma, fit_intercept=False, tol=0)
+            alpha=lmbd, gamma=gamma, fit_intercept=False, tol=1e-12)
         warnings.filterwarnings('ignore', category=ConvergenceWarning)
 
         self.run(1)  # Make sure we cache the numba compilation.
