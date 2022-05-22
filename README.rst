@@ -30,14 +30,41 @@ This benchmark can be run using the following commands:
    $ git clone https://github.com/benchopt/benchmark_mcp
    $ benchopt run ./benchmark_mcp
 
-Apart from the problem, options can be passed to `benchopt run`, to restrict the benchmarks to some solvers or datasets, e.g.:
+
+
+To demonstrate the use of benchopt, one can run, from the benchmark_lasso folder:
 
 .. code-block::
 
-	$ benchopt run ./benchmark_mcp -s cd -d simulated --max-runs 10 --n-repetitions 5
+   $ benchopt install . -s cd -s pgd --env
+   $ benchopt run . --config example_config.yml --env
+
+Alternatively, one can use the command line interface to select which problems, datasets and solvers are used:
+
+.. code-block::
+
+   $ benchopt run -s cd -s pgd -d simulated --max-runs 10 --n-repetitions 5
 
 
-Use `benchopt run -h` for more details about these options, or visit https://benchopt.github.io/cli.html.
+Use `benchopt run -h` for more details about these options, or visit https://benchopt.github.io/api.html.
+
+
+Troubleshooting
+---------------
+
+If you run into some errors when running the examples present in this Readme, try installing the development version of `benchopt`:
+
+.. code-block::
+
+  $ pip install -U git+https://github.com/benchopt/benchopt
+
+If issues persist, you can also try running the benchmark in local mode with the `-l` option, e.g.:
+
+.. code-block::
+
+  $ benchopt run . -l -s cd -d simulated --max-runs 10 --n-repetitions 10
+
+Note that in this case, only solvers which dependencies are installed in the current env will be run.
 
 .. |Build Status| image:: https://github.com/benchopt/benchmark_mcp/workflows/Tests/badge.svg
    :target: https://github.com/benchopt/benchmark_mcp/actions
