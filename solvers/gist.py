@@ -4,8 +4,7 @@ from benchopt import BaseSolver, safe_import_context
 with safe_import_context() as import_ctx:
     import numpy as np
     from numpy.linalg import norm
-    from scipy import sparse
-    from numba import njit
+r from numba import njit
 
 if import_ctx.failed_import:
 
@@ -37,12 +36,7 @@ def mcp_value(w, lmbd, gamma):
 
 
 def cost(X, y, w, lmbd, gamma):
-    """Compute the following objective function.
-
-    min_w 0.5 || y - X w||_2^2 +  \sum_k pen(|w_k|),
-
-    where pen is then nonconvex regularizer.
-    """
+    """Compute MCP Regression objective."""
     penalty = mcp_value(w, lmbd, gamma)
     return 0.5 * norm(y - X @ w)**2 / X.shape[0] + penalty
 

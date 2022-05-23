@@ -2,7 +2,6 @@ from benchopt import BaseSolver, safe_import_context
 
 with safe_import_context() as import_ctx:
     import numpy as np
-    from scipy import sparse
     from numba import njit
 
 
@@ -45,8 +44,9 @@ def norm_col_sparse(data, indptr):
         norms[j] = np.sqrt(tmp)
     return norms
 
+
 @njit
-def cd(X, y, lmbd, gamma, lipschitz, n_iter, winit=None,tol=1e-3):
+def cd(X, y, lmbd, gamma, lipschitz, n_iter, winit=None, tol=1e-3):
     n_samples, n_features = X.shape
     R = np.copy(y)
     w = np.zeros(n_features)
@@ -63,14 +63,15 @@ def cd(X, y, lmbd, gamma, lipschitz, n_iter, winit=None,tol=1e-3):
                 diff = old - w[j]
                 if diff != 0:
                     R += diff * X[:, j]
-        grad = - X.T.dot(y - X.dot(w))/ n_samples
-        subdiff_dist = subdiff_distance(w,grad,all_feats,lmbd,gamma)
-        if np.max(subdiff_dist)<tol:
+        grad = - X.T.dot(y - X.dot(w)) / n_samples
+        subdiff_dist = subdiff_distance(w, grad, all_feats, lmbd, gamma)
+        if np.max(subdiff_dist) < tol:
             return w
     return w
 
+
 @njit
-def subdiff_distance(w, grad, ws,lmbd,gamma):
+def subdiff_distance(w, grad, ws, lmbd, gamma):
     """Compute distance of negative gradient to the subdifferential at w."""
     subdiff_dist = np.zeros_like(grad)
     for idx, j in enumerate(ws):
@@ -87,37 +88,37 @@ def subdiff_distance(w, grad, ws,lmbd,gamma):
             subdiff_dist[idx] = np.abs(grad[idx])
     return subdiff_dist
 
-@njit
-def wscd(X, y, lmbd, gamma, lipschitz, n_iter, n_iter_outer, pruning=True,tol=1e-8):
 
-    n_samples, n_features = X.shape
+@njit
+def wscd(X, y, lmbd, gamma, lipschitz, n_iter, n_iter_outer, pruning=True,
+         tol=1e-8):
+
+    n_features = X.shape[1]
     nb_feat_init = 10
     nb_feat_2_add = 30
     ind = np.argsort(-np.abs(X.T.dot(y)))[:nb_feat_init]
 
-
     all_feats = np.arange(n_features)
     winit = np.zeros((nb_feat_init))
     w = np.zeros((n_features))
-    
+
     for i in range(n_iter_outer):
         Xaux = X[:, ind]
 
-    
-        w_inter = cd(Xaux, y, lmbd, gamma, lipschitz, n_iter,winit)
-            
+        w_inter = cd(Xaux, y, lmbd, gamma, lipschitz, n_iter, winit)
+
         # pruning
         if pruning:
-             w_inter, ind, Xaux= w_inter[w_inter.nonzero()[0]], ind[w_inter.nonzero()[0]], Xaux[:,w_inter.nonzero()[0]]
+            w_inter = w_inter[w_inter.nonzero()[0]]
+            ind = ind[w_inter.nonzero()[0]]
+            Xaux = Xaux[:, w_inter.nonzero()[0]]
 
-            
-        res = (y - Xaux.dot(w_inter))
-        grad = - X.T.dot(res)
+        res = y - Xaux @ w_inter
+        grad = - X.T @ res
 
-        subdiff_dist = subdiff_distance(w,grad,all_feats,lmbd,gamma)
-        if np.max(subdiff_dist)<tol:
+        subdiff_dist = subdiff_distance(w, grad, all_feats, lmbd, gamma)
+        if np.max(subdiff_dist) < tol:
             return w
-       
 
         candidate = np.argsort(-np.abs(grad))
         nb_add = 0
@@ -129,12 +130,10 @@ def wscd(X, y, lmbd, gamma, lipschitz, n_iter, n_iter_outer, pruning=True,tol=1e
                     break
 
         w_init = np.hstack((w_inter, np.zeros(nb_add)))
-    
-    # ------------------  gathering vectors and outputs ---------------------- 
-    w = np.zeros(n_features)
 
+    w = np.zeros(n_features)
     w[ind] = w_init
-    
+
     return w
 
 
@@ -142,7 +141,6 @@ class Solver(BaseSolver):
     name = "working set cd"
     install_cmd = "conda"
     requirements = ["numba"]
-
 
     def set_objective(self, X, y, lmbd, gamma):
         self.X, self.y = X, y
@@ -152,13 +150,10 @@ class Solver(BaseSolver):
         self.run(1)
 
     def run(self, n_iter):
-        X = self.X
-
         lipschitz = np.sum(self.X ** 2, axis=0) / len(self.y)
         self.w = wscd(
-                self.X, self.y, self.lmbd, self.gamma, lipschitz, n_iter ,self.n_iter_outer)
-
-
+            self.X, self.y, self.lmbd, self.gamma, lipschitz, n_iter,
+            self.n_iter_outer)
 
     @staticmethod
     @njit
@@ -183,7 +178,6 @@ class Solver(BaseSolver):
                         for ind in range(X_indptr[j], X_indptr[j + 1]):
                             R[X_indices[ind]] += diff * X_data[ind]
         return w
-
 
     def get_result(self):
         return self.w
