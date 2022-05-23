@@ -1,0 +1,13 @@
+objective:
+  - MCP Regression[reg=0.1, gamma=3]
+
+dataset: # dataset to run benchmark on
+  - Simulated[n_samples=100, n_features=200,scale=True]
+
+solver: # list of example solvers to do benchmark
+  - cd
+  - pgd[use_acceleration=True]
+
+# note: use more repetitions to have quantiles on the plot
+n-repetitions: 1
+max-runs: 20
