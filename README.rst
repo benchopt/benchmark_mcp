@@ -3,7 +3,7 @@ Benchmark repository for MCP
 
 |Build Status| |Python 3.6+|
 
-BenchOpt is a package to simplify and make more transparent and
+Benchopt is a package to simplify and make more transparent and
 reproducible the comparisons of optimization algorithms.
 Regression with the Minimax Concave Penalty (MCP) consists in solving the following program:
 
@@ -21,24 +21,23 @@ $$y \\in \\mathbb{R}^n, \\ X \\in \\mathbb{R}^{n \\times p}$$
 Install
 --------
 
-This benchmark can be run using the following commands:
+This benchmark can be downloaded using the following commands:
 
 .. code-block::
 
    $ pip install -U benchopt
    $ git clone https://github.com/benchopt/benchmark_mcp
    $ cd benchmark_mcp/
-   $ benchopt run .
 
 
-To demonstrate the use of benchopt, one can run, from the benchmark_lasso folder:
+To demonstrate the use of benchopt on a simple benchmark configuration, one can run, from the `benchmark_lasso` folder:
 
 .. code-block::
 
    $ benchopt install . -s cd -s pgd --env
    $ benchopt run . --config example_config.yml --env
 
-Alternatively, one can use the command line interface to select which problems, datasets and solvers are used:
+Alternatively, one can use the command line interface to select which objectives, datasets and solvers are used:
 
 .. code-block::
 
