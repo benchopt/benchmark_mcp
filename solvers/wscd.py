@@ -2,6 +2,7 @@ from benchopt import BaseSolver, safe_import_context
 
 with safe_import_context() as import_ctx:
     import numpy as np
+    from scipy import sparse
     from numba import njit
 
 
@@ -46,13 +47,16 @@ def norm_col_sparse(data, indptr):
 
 
 @njit
-def cd(X, y, lmbd, gamma, lipschitz, n_iter, winit=None, tol=1e-3):
+def cd(X, y, lmbd, gamma, lipschitz, n_iter, winit, tol=1e-5):
     n_samples, n_features = X.shape
     R = np.copy(y)
     w = np.zeros(n_features)
+    # TODO a proper warm start
+    #w = np.copy(winit)
     all_feats = np.arange(n_features)
+    #print(lipschitz.shape,X.shape,w)
     for _ in range(n_iter):
-        for j in range(n_features):
+        for j in np.arange(n_features):
             if lipschitz[j]:
                 old = w[j]
                 w[j] = prox_mcp(
@@ -67,6 +71,8 @@ def cd(X, y, lmbd, gamma, lipschitz, n_iter, winit=None, tol=1e-3):
         subdiff_dist = subdiff_distance(w, grad, all_feats, lmbd, gamma)
         if np.max(subdiff_dist) < tol:
             return w
+        #else:
+        #    print(np.max(subdiff_dist),w)
     return w
 
 
@@ -88,48 +94,80 @@ def subdiff_distance(w, grad, ws, lmbd, gamma):
             subdiff_dist[idx] = np.abs(grad[idx])
     return subdiff_dist
 
+@njit
+def sparse_cd(
+        X_data, X_indices, X_indptr, y, lmbd, gamma, lipschitz, n_iter, winit, tol=1e-5):
+    n_features = len(X_indptr) - 1
+    n_samples = len(y)
+    all_feats = np.arange(n_features)
+    w = np.zeros(n_features)
+    R = np.copy(y)
+    for _ in range(n_iter):
+        for j in range(n_features):
+            if lipschitz[j]:
+                old = w[j]
+                XjtR = 0.0
+                for ind in range(X_indptr[j], X_indptr[j + 1]):
+                    XjtR += X_data[ind] * R[X_indices[ind]]
+
+                w[j] = prox_mcp(w[j] + XjtR / (lipschitz[j] * n_samples),
+                                lmbd / lipschitz[j], gamma * lipschitz[j])
+                diff = old - w[j]
+                if diff != 0:
+                    for ind in range(X_indptr[j], X_indptr[j + 1]):
+                        R[X_indices[ind]] += diff * X_data[ind]
+        subdiff_dist = subdiff_distance(w, R, all_feats, lmbd, gamma)
+        if np.max(subdiff_dist) < tol:
+            return w
+    return w
+
 
 @njit
 def wscd(X, y, lmbd, gamma, lipschitz, n_iter, n_iter_outer, pruning=True,
-         tol=1e-8):
-
-    n_features = X.shape[1]
+         tol=1e-8,sparsity=False):
+    
+    n_samples, n_features = X.shape
     nb_feat_init = 10
     nb_feat_2_add = 30
     ind = np.argsort(-np.abs(X.T.dot(y)))[:nb_feat_init]
 
     all_feats = np.arange(n_features)
-    winit = np.zeros((nb_feat_init))
+    w_init = np.zeros((nb_feat_init))
     w = np.zeros((n_features))
 
     for i in range(n_iter_outer):
         Xaux = X[:, ind]
 
-        w_inter = cd(Xaux, y, lmbd, gamma, lipschitz, n_iter, winit)
-
+        if sparsity:
+            pass
+            # TODO a proper call to the appropriate function
+        else:
+            w_inter = cd(Xaux, y, lmbd, gamma, lipschitz[ind], n_iter, w_init)
         # pruning
         if pruning:
-            w_inter = w_inter[w_inter.nonzero()[0]]
-            ind = ind[w_inter.nonzero()[0]]
-            Xaux = Xaux[:, w_inter.nonzero()[0]]
+            nnz = (w_inter !=0)
+            w_inter = w_inter[nnz]
+            ind = ind[nnz]
+            Xaux = Xaux[:,nnz]
 
         res = y - Xaux @ w_inter
-        grad = - X.T @ res
+        grad = - X.T @ res / n_samples
 
         subdiff_dist = subdiff_distance(w, grad, all_feats, lmbd, gamma)
         if np.max(subdiff_dist) < tol:
+            w[ind] = w_inter
             return w
 
-        candidate = np.argsort(-np.abs(grad))
-        nb_add = 0
-        for cand in candidate:
-            if cand not in ind:
-                ind = np.hstack((ind, np.array([cand])))
-                nb_add += 1
-                if nb_add == nb_feat_2_add:
-                    break
+            
+            
+        grad[ind] = 0
+        candidate = np.argsort(-np.abs(grad)) 
+        # TODO use argpartition when numba implems is available
 
-        w_init = np.hstack((w_inter, np.zeros(nb_add)))
+        ind = np.hstack((ind, candidate[:nb_feat_2_add]))
+        w_init = np.hstack((w_inter, np.zeros(nb_feat_2_add)))
+
+
 
     w = np.zeros(n_features)
     w[ind] = w_init
@@ -138,7 +176,7 @@ def wscd(X, y, lmbd, gamma, lipschitz, n_iter, n_iter_outer, pruning=True,
 
 
 class Solver(BaseSolver):
-    name = "working set cd"
+    name = "working_set_cd"
     install_cmd = "conda"
     requirements = ["numba"]
 
@@ -150,34 +188,18 @@ class Solver(BaseSolver):
         self.run(1)
 
     def run(self, n_iter):
-        lipschitz = np.sum(self.X ** 2, axis=0) / len(self.y)
+        X = self.X
+        if sparse.issparse(X):
+            lipschitz = norm_col_sparse(X.data, X.indptr) ** 2 / len(self.y)
+            sparsity = True
+        else:
+            sparsity= False
+            lipschitz = np.sum(self.X ** 2, axis=0) / len(self.y)
         self.w = wscd(
             self.X, self.y, self.lmbd, self.gamma, lipschitz, n_iter,
-            self.n_iter_outer)
+            self.n_iter_outer,sparsity=sparsity)
 
-    @staticmethod
-    @njit
-    def sparse_cd(
-            X_data, X_indices, X_indptr, y, lmbd, gamma, lipschitz, n_iter):
-        n_features = len(X_indptr) - 1
-        n_samples = len(y)
-        w = np.zeros(n_features)
-        R = np.copy(y)
-        for _ in range(n_iter):
-            for j in range(n_features):
-                if lipschitz[j]:
-                    old = w[j]
-                    XjtR = 0.0
-                    for ind in range(X_indptr[j], X_indptr[j + 1]):
-                        XjtR += X_data[ind] * R[X_indices[ind]]
 
-                    w[j] = prox_mcp(w[j] + XjtR / (lipschitz[j] * n_samples),
-                                    lmbd / lipschitz[j], gamma * lipschitz[j])
-                    diff = old - w[j]
-                    if diff != 0:
-                        for ind in range(X_indptr[j], X_indptr[j + 1]):
-                            R[X_indices[ind]] += diff * X_data[ind]
-        return w
 
     def get_result(self):
         return self.w

@@ -4,7 +4,7 @@ from benchopt import BaseSolver, safe_import_context
 with safe_import_context() as import_ctx:
     import numpy as np
     from numpy.linalg import norm
-r from numba import njit
+    from numba import njit
 
 if import_ctx.failed_import:
 
