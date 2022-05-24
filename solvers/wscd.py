@@ -52,9 +52,8 @@ def cd(X, y, lmbd, gamma, lipschitz, n_iter, winit, tol=1e-5):
     R = np.copy(y)
     w = np.zeros(n_features)
     # TODO a proper warm start
-    #w = np.copy(winit)
+    # w = np.copy(winit)
     all_feats = np.arange(n_features)
-    #print(lipschitz.shape,X.shape,w)
     for _ in range(n_iter):
         for j in np.arange(n_features):
             if lipschitz[j]:
@@ -71,8 +70,7 @@ def cd(X, y, lmbd, gamma, lipschitz, n_iter, winit, tol=1e-5):
         subdiff_dist = subdiff_distance(w, grad, all_feats, lmbd, gamma)
         if np.max(subdiff_dist) < tol:
             return w
-        #else:
-        #    print(np.max(subdiff_dist),w)
+
     return w
 
 
@@ -94,9 +92,11 @@ def subdiff_distance(w, grad, ws, lmbd, gamma):
             subdiff_dist[idx] = np.abs(grad[idx])
     return subdiff_dist
 
+
 @njit
 def sparse_cd(
-        X_data, X_indices, X_indptr, y, lmbd, gamma, lipschitz, n_iter, winit, tol=1e-5):
+        X_data, X_indices, X_indptr, y, lmbd, gamma, lipschitz, n_iter, winit,
+        tol=1e-5):
     n_features = len(X_indptr) - 1
     n_samples = len(y)
     all_feats = np.arange(n_features)
@@ -124,8 +124,8 @@ def sparse_cd(
 
 @njit
 def wscd(X, y, lmbd, gamma, lipschitz, n_iter, n_iter_outer, pruning=True,
-         tol=1e-8,sparsity=False):
-    
+         tol=1e-8, sparsity=False):
+
     n_samples, n_features = X.shape
     nb_feat_init = 10
     nb_feat_2_add = 30
@@ -140,15 +140,15 @@ def wscd(X, y, lmbd, gamma, lipschitz, n_iter, n_iter_outer, pruning=True,
 
         if sparsity:
             pass
-            # TODO a proper call to the appropriate function
+            # TODO a proper call to the appropriate sparse function
         else:
             w_inter = cd(Xaux, y, lmbd, gamma, lipschitz[ind], n_iter, w_init)
         # pruning
         if pruning:
-            nnz = (w_inter !=0)
+            nnz = (w_inter != 0)
             w_inter = w_inter[nnz]
             ind = ind[nnz]
-            Xaux = Xaux[:,nnz]
+            Xaux = Xaux[:, nnz]
 
         res = y - Xaux @ w_inter
         grad = - X.T @ res / n_samples
@@ -157,18 +157,12 @@ def wscd(X, y, lmbd, gamma, lipschitz, n_iter, n_iter_outer, pruning=True,
         if np.max(subdiff_dist) < tol:
             w[ind] = w_inter
             return w
-
-            
-            
         grad[ind] = 0
-        candidate = np.argsort(-np.abs(grad)) 
+        candidate = np.argsort(-np.abs(grad))
         # TODO use argpartition when numba implems is available
 
         ind = np.hstack((ind, candidate[:nb_feat_2_add]))
         w_init = np.hstack((w_inter, np.zeros(nb_feat_2_add)))
-
-
-
     w = np.zeros(n_features)
     w[ind] = w_init
 
@@ -193,13 +187,11 @@ class Solver(BaseSolver):
             lipschitz = norm_col_sparse(X.data, X.indptr) ** 2 / len(self.y)
             sparsity = True
         else:
-            sparsity= False
+            sparsity = False
             lipschitz = np.sum(self.X ** 2, axis=0) / len(self.y)
         self.w = wscd(
             self.X, self.y, self.lmbd, self.gamma, lipschitz, n_iter,
-            self.n_iter_outer,sparsity=sparsity)
-
-
+            self.n_iter_outer, sparsity=sparsity)
 
     def get_result(self):
         return self.w
