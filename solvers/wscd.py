@@ -132,7 +132,9 @@ def wscd(X, y, lmbd, gamma, lipschitz, n_iter, n_iter_outer, pruning=True,
     ind = np.argsort(-np.abs(X.T.dot(y)))[:nb_feat_init]
 
     all_feats = np.arange(n_features)
+    # this is the initialization for the working set value
     w_init = np.zeros((nb_feat_init))
+    # initialization of the full vector. use for computed the optimality
     w = np.zeros((n_features))
 
     for i in range(n_iter_outer):
@@ -142,7 +144,8 @@ def wscd(X, y, lmbd, gamma, lipschitz, n_iter, n_iter_outer, pruning=True,
             pass
             # TODO a proper call to the appropriate sparse function
         else:
-            w_inter = cd(Xaux, y, lmbd, gamma, lipschitz[ind], n_iter, w_init)
+            lip = lipschitz[ind]
+            w_inter = cd(Xaux, y, lmbd, gamma, lip, n_iter, w_init, tol=tol)
         # pruning
         if pruning:
             nnz = (w_inter != 0)
@@ -152,12 +155,15 @@ def wscd(X, y, lmbd, gamma, lipschitz, n_iter, n_iter_outer, pruning=True,
 
         res = y - Xaux @ w_inter
         grad = - X.T @ res / n_samples
-
+        w[ind] = w_inter
         subdiff_dist = subdiff_distance(w, grad, all_feats, lmbd, gamma)
-        if np.max(subdiff_dist) < tol:
-            w[ind] = w_inter
+        if np.max(np.abs(subdiff_dist)) < tol:
             return w
+        else:
+            w[ind] = 0
+        # remove current working set from the candidate selection
         grad[ind] = 0
+        # compute candidate
         candidate = np.argsort(-np.abs(grad))
         # TODO use argpartition when numba implems is available
 
@@ -170,7 +176,7 @@ def wscd(X, y, lmbd, gamma, lipschitz, n_iter, n_iter_outer, pruning=True,
 
 
 class Solver(BaseSolver):
-    name = "working_set_cd"
+    name = "WorkSet_CD"
     install_cmd = "conda"
     requirements = ["numba"]
 

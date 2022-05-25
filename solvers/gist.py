@@ -35,6 +35,7 @@ def mcp_value(w, lmbd, gamma):
     return np.sum(value)
 
 
+@njit
 def cost(X, y, w, lmbd, gamma):
     """Compute MCP Regression objective."""
     penalty = mcp_value(w, lmbd, gamma)
@@ -52,9 +53,8 @@ class Solver(BaseSolver):
     ]
 
     # any parameter defined here is accessible as a class attribute
-    tmax = 1e10
     eta = 1.5
-    sigma = 0.1
+    sigma = 0.5
     tol = 1e-6
 
     def set_objective(self, X, y, lmbd, gamma):
@@ -65,13 +65,14 @@ class Solver(BaseSolver):
 
     def run(self, n_iter):
         n_samples, n_features = self.X.shape
+        L = np.linalg.norm(self.X, ord=2) ** 2 / n_samples
 
         w = np.zeros(n_features)
         not_converged = False
 
         cost_new = cost(self.X, self.y, w, self.lmbd, self.gamma)
         wp_aux = np.zeros(n_features, dtype=np.float64)
-        for _ in range(n_iter):
+        for k in range(n_iter):
             t = 1
             # gradient update
             grad = - self.X.T.dot(self.y - self.X @ w) / n_samples
@@ -84,16 +85,16 @@ class Solver(BaseSolver):
                 self.X, self.y, wp_aux, self.lmbd, self.gamma)
 
             while (cost_new - cost_old >
-                   - self.sigma / 2 * t * norm(w - wp_aux)**2):
+                    - self.sigma / 2 * t * norm(w - wp_aux)**2):
                 t = t * self.eta
                 wp_aux = prox_mcp_vec(w - grad/t, self.lmbd/t, self.gamma*t)
                 cost_new = cost(self.X, self.y, wp_aux, self.lmbd, self.gamma)
 
-                if t > self.tmax:
-                    print('Not converging. Stepsizes too small!', t, self.tol)
-                    not_converged = True
+                if t > L:
+                    t = L
+                    wp_aux = prox_mcp_vec(w - grad/t, self.lmbd/t,
+                                          self.gamma*t)
                     break
-
             w[:] = wp_aux
             if not_converged:
                 break
