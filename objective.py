@@ -49,5 +49,8 @@ class Objective(BaseObjective):
     def _get_lambda_max(self):
         return abs(self.X.T @ self.y).max() / len(self.y)
 
+    def get_one_solution(self):
+        return np.zeros(self.X.shape[1])
+
     def to_dict(self):
         return dict(X=self.X, y=self.y, lmbd=self.lmbd, gamma=self.gamma)
