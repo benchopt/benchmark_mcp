@@ -32,6 +32,5 @@ class Dataset(BaseDataset):
             self.n_samples, self.n_features, random_state=self.random_state)
         if self.scale:
             X /= np.linalg.norm(X, axis=0) / np.sqrt(len(y))
-        data = dict(X=X, y=y)
 
-        return self.n_features, data
+        return dict(X=X, y=y)
