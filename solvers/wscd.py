@@ -47,15 +47,14 @@ def norm_col_sparse(data, indptr):
 
 
 @njit
-def cd(X, y, lmbd, gamma, lipschitz, n_iter, winit, tol=1e-5):
+def cd(X, y, lmbd, gamma, lipschitz, n_iter, winit, tol=1e-10):
     n_samples, n_features = X.shape
-    R = np.copy(y)
-    w = np.zeros(n_features)
-    # TODO a proper warm start
-    # w = np.copy(winit)
+
+    w = winit
+    R = y - X @ w
     all_feats = np.arange(n_features)
     for _ in range(n_iter):
-        for j in np.arange(n_features):
+        for j in range(n_features):
             if lipschitz[j]:
                 old = w[j]
                 w[j] = prox_mcp(
@@ -66,9 +65,9 @@ def cd(X, y, lmbd, gamma, lipschitz, n_iter, winit, tol=1e-5):
                 diff = old - w[j]
                 if diff != 0:
                     R += diff * X[:, j]
-        grad = - X.T.dot(y - X.dot(w)) / n_samples
+        grad = - X.T.dot(y - X @ w) / n_samples
         subdiff_dist = subdiff_distance(w, grad, all_feats, lmbd, gamma)
-        if np.max(subdiff_dist) < tol:
+        if np.max(np.abs(subdiff_dist)) < tol:
             return w
 
     return w
@@ -127,16 +126,15 @@ def wscd(X, y, lmbd, gamma, lipschitz, n_iter, n_iter_outer, pruning=True,
          tol=1e-12, sparsity=False):
 
     n_samples, n_features = X.shape
-    nb_feat_init = 10
-    nb_feat_2_add = 30
-    ind = np.argsort(-np.abs(X.T.dot(y)))[:nb_feat_init]
+    n_feat_init = 30
+    nb_feat_2_add = 50
+    ind = np.argsort(-np.abs(X.T.dot(y)))[:n_feat_init]
 
     all_feats = np.arange(n_features)
     # this is the initialization for the working set value
-    w_init = np.zeros((nb_feat_init))
+    w_init = np.zeros((n_feat_init))
     # initialization of the full vector. use for computed the optimality
     w = np.zeros((n_features))
-
     for i in range(n_iter_outer):
         Xaux = X[:, ind]
 
@@ -145,7 +143,7 @@ def wscd(X, y, lmbd, gamma, lipschitz, n_iter, n_iter_outer, pruning=True,
             # TODO a proper call to the appropriate sparse function
         else:
             lip = lipschitz[ind]
-            w_inter = cd(Xaux, y, lmbd, gamma, lip, n_iter, w_init, tol=tol)
+            w_inter = cd(Xaux, y, lmbd, gamma, lip, n_iter, w_init)
         # pruning
         if pruning:
             nnz = (w_inter != 0)
@@ -166,9 +164,11 @@ def wscd(X, y, lmbd, gamma, lipschitz, n_iter, n_iter_outer, pruning=True,
         # compute candidate
         candidate = np.argsort(-np.abs(grad))
         # TODO use argpartition when numba implems is available
-
-        ind = np.hstack((ind, candidate[:nb_feat_2_add]))
-        w_init = np.hstack((w_inter, np.zeros(nb_feat_2_add)))
+        if len(ind) < n_features:
+            if n_features - len(ind) < nb_feat_2_add:
+                nb_feat_2_add = n_features - len(ind)
+            ind = np.hstack((ind, candidate[:nb_feat_2_add]))
+            w_init = np.hstack((w_inter, np.zeros(nb_feat_2_add)))
     w = np.zeros(n_features)
     w[ind] = w_init
 
