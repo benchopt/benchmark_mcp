@@ -124,7 +124,7 @@ def sparse_cd(
 
 @njit
 def wscd(X, y, lmbd, gamma, lipschitz, n_iter, n_iter_outer, pruning=True,
-         tol=1e-8, sparsity=False):
+         tol=1e-12, sparsity=False):
 
     n_samples, n_features = X.shape
     nb_feat_init = 10
@@ -183,7 +183,7 @@ class Solver(BaseSolver):
     def set_objective(self, X, y, lmbd, gamma):
         self.X, self.y = X, y
         self.lmbd, self.gamma = lmbd, gamma
-        self.n_iter_outer = 10
+        self.n_iter_inner = 20000
         # Make sure we cache the numba compilation.
         self.run(1)
 
@@ -196,8 +196,8 @@ class Solver(BaseSolver):
             sparsity = False
             lipschitz = np.sum(self.X ** 2, axis=0) / len(self.y)
         self.w = wscd(
-            self.X, self.y, self.lmbd, self.gamma, lipschitz, n_iter,
-            self.n_iter_outer, sparsity=sparsity)
+            self.X, self.y, self.lmbd, self.gamma, lipschitz,
+            self.n_iter_inner, n_iter, sparsity=sparsity)
 
     def get_result(self):
         return self.w
