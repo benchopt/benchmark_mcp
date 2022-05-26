@@ -98,7 +98,7 @@ def sparse_cd(
     w = np.zeros(n_features)
     R = np.copy(y)
     # TODO implement a proper winit for sparse matrix
-    
+
     for _ in range(n_iter):
         for j in range(n_features):
             if lipschitz[j]:
