@@ -7,8 +7,8 @@ import matplotlib.pyplot as plt
 from celer.plot_utils import configure_plt
 
 
-SAVEFIG = False
-# SAVEFIG = True
+# SAVEFIG = False
+SAVEFIG = True
 figname = "mcp"
 # figname = "finance"
 # figname = "rcv1_news20"
@@ -54,14 +54,14 @@ DICT_YLABEL = {
 }
 
 DICT_YTICKS = {
-    'libsvm[dataset=colon-cancer]': [1e3, 1, 1e-3, 1e-6],
-    'Simulated[n_features=2000,n_samples=500,scale=True]': [1e3, 1, 1e-3, 1e-6],
-    'Simulated[n_features=2000,n_samples=500,scale=False]': [1e3, 1, 1e-3, 1e-6],
+    'libsvm[dataset=colon-cancer]': [1e2, 1e-1, 1e-4, 1e-7, 1e-10],
+    'Simulated[n_features=2000,n_samples=500,scale=True]': [1e2, 1e-1, 1e-4, 1e-7, 1e-10],
+    'Simulated[n_features=2000,n_samples=500,scale=False]': [1e2, 1e-1, 1e-4, 1e-7, 1e-10],
 }
 
 DICT_XTICKS = {
-    'Simulated[n_features=2000,n_samples=500,scale=False]': np.geomspace(1e-2, 1e2, 5),
-    'Simulated[n_features=2000,n_samples=500,scale=True]': np.geomspace(1e-2, 1e2, 5),
+    'Simulated[n_features=2000,n_samples=500,scale=False]': np.geomspace(1e-3, 1e1, 5),
+    'Simulated[n_features=2000,n_samples=500,scale=True]': np.geomspace(1e-3, 1e1, 5),
     'libsvm[dataset=colon-cancer]': np.geomspace(1e-4, 1e2, 7),
 }
 
@@ -139,6 +139,7 @@ for idx_data, dataset in enumerate(datasets):
         dataset_label = dataset
     axarr[idx_data, 0].set_ylabel(DICT_YLABEL[dataset], fontsize=labelsize)
     axarr[idx_data, 0].set_yticks(DICT_YTICKS[dataset])
+    axarr[idx_data, 0].set_ylim([1e-10, 1e2])
 
 plt.show(block=False)
 
@@ -148,7 +149,6 @@ n_col = 3
 if n_col is None:
     n_col = len(axarr[0, 0].lines)
 
-# take first ax, more likely to have all solvers converging
 ax = axarr[0, 0]
 lines_ordered = list(itertools.chain(
     *[ax.lines[i::n_col] for i in range(n_col)]))

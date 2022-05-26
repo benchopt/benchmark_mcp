@@ -3,7 +3,8 @@ objective:
   - MCP Regression[reg=0.01,gamma=3]
   - MCP Regression[reg=0.001,gamma=3]
 dataset:
-  - simulated[n_samples=500,n_features=2000,scale=[True,False]]
+  - simulated[n_samples=500,n_features=2000,scale=True]
+  - simulated[n_samples=500,n_features=2000,scale=False]
   - libsvm[dataset=colon-cancer]
   # - libsvm[dataset=rcv1.binary]
 n-repetitions: 5
