@@ -25,12 +25,9 @@ def st(x, mu):
 def prox_mcp(x, lmbd, gamma):
     if gamma < 1:
         return 0 if abs(x) <= lmbd else x
-        # TODO potential numerical errors in <=  leading to hard discontinuity
+    if np.abs(x) > gamma * lmbd:
+        return x
 
-    if x > gamma * lmbd:
-        return x
-    if x < -gamma * lmbd:
-        return x
     return gamma / (gamma - 1) * st(x, lmbd)
 
 
@@ -65,10 +62,10 @@ def cd(X, y, lmbd, gamma, lipschitz, n_iter, winit, tol=1e-10):
                 diff = old - w[j]
                 if diff != 0:
                     R += diff * X[:, j]
-        grad = - X.T.dot(y - X @ w) / n_samples
+        grad = X.T @  (X @ w - y) / n_samples
         subdiff_dist = subdiff_distance(w, grad, all_feats, lmbd, gamma)
         if np.max(np.abs(subdiff_dist)) < tol:
-            return w
+            break
 
     return w
 
@@ -83,9 +80,8 @@ def subdiff_distance(w, grad, ws, lmbd, gamma):
             subdiff_dist[idx] = max(0, np.abs(grad[idx]) - lmbd)
         elif np.abs(w[j]) < lmbd * gamma:
             # distance of -grad_j to (alpha - abs(w[j])/gamma) * sign(w[j])
-            subdiff_dist[idx] = np.abs(
-                grad[idx] + lmbd * np.sign(w[j])
-                - w[j] / gamma)
+            subdiff_dist[idx] = np.abs(grad[idx] + lmbd * np.sign(w[j])
+                                       - w[j] / gamma)
         else:
             # distance of grad to 0
             subdiff_dist[idx] = np.abs(grad[idx])
@@ -101,6 +97,8 @@ def sparse_cd(
     all_feats = np.arange(n_features)
     w = np.zeros(n_features)
     R = np.copy(y)
+    # TODO implement a proper winit for sparse matrix
+    
     for _ in range(n_iter):
         for j in range(n_features):
             if lipschitz[j]:
@@ -128,11 +126,11 @@ def wscd(X, y, lmbd, gamma, lipschitz, n_iter, n_iter_outer, pruning=True,
     n_samples, n_features = X.shape
     n_feat_init = 30
     nb_feat_2_add = 50
-    ind = np.argsort(-np.abs(X.T.dot(y)))[:n_feat_init]
+    ind = np.argsort(-np.abs(X.T @ y))[:n_feat_init]
 
     all_feats = np.arange(n_features)
     # this is the initialization for the working set value
-    w_init = np.zeros((n_feat_init))
+    w_init = np.zeros(n_feat_init)
     # initialization of the full vector. use for computed the optimality
     w = np.zeros((n_features))
     for i in range(n_iter_outer):
@@ -146,10 +144,10 @@ def wscd(X, y, lmbd, gamma, lipschitz, n_iter, n_iter_outer, pruning=True,
             w_inter = cd(Xaux, y, lmbd, gamma, lip, n_iter, w_init)
         # pruning
         if pruning:
-            nnz = (w_inter != 0)
-            w_inter = w_inter[nnz]
-            ind = ind[nnz]
-            Xaux = Xaux[:, nnz]
+            support = (w_inter != 0)
+            w_inter = w_inter[support]
+            ind = ind[support]
+            Xaux = Xaux[:, support]
 
         res = y - Xaux @ w_inter
         grad = - X.T @ res / n_samples
@@ -176,7 +174,7 @@ def wscd(X, y, lmbd, gamma, lipschitz, n_iter, n_iter_outer, pruning=True,
 
 
 class Solver(BaseSolver):
-    name = "WorkSet_CD"
+    name = "working_set_CD"
     install_cmd = "conda"
     requirements = ["numba"]
 
