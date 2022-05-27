@@ -1,6 +1,8 @@
 import re
 import os
 import itertools
+from pathlib import Path
+
 import numpy as np
 import pandas as pd
 import matplotlib.pyplot as plt
@@ -10,13 +12,11 @@ from celer.plot_utils import configure_plt
 # SAVEFIG = False
 SAVEFIG = True
 figname = "mcp"
-# figname = "finance"
-# figname = "rcv1_news20"
 
 # RUN `benchopt run . --config config_medium.yml`, then replace BENCH_NAME
 # by the name of the produced results csv file.
 
-BENCH_NAME = "mcp-neurips.csv"
+BENCH_NAME = "outputs/mcp_neurips.csv"
 
 FLOATING_PRECISION = 1e-8
 MIN_XLIM = 1e-3
@@ -86,7 +86,7 @@ objectives = df["objective_name"].unique()
 titlesize = 22
 ticksize = 16
 labelsize = 20
-regex = re.compile('\[(.*?)\]')
+regex = re.compile(r'\[(.*?)\]')
 
 plt.close('all')
 fig1, axarr = plt.subplots(
@@ -165,12 +165,9 @@ plt.show(block=False)
 
 
 if SAVEFIG:
+    Path('./figures').mkdir(exist_ok=True)
     fig1_name = f"figures/{figname}.pdf"
     fig1.savefig(fig1_name)
-    os.system(f"pdfcrop {fig1_name} {fig1_name}")
-    fig1.savefig(f"figures/{figname}.svg")
 
     fig2_name = f"figures/{figname}_legend.pdf"
     fig2.savefig(fig2_name)
-    os.system(f"pdfcrop {fig2_name} {fig2_name}")
-    fig2.savefig(f"figures/{figname}_legend.svg")

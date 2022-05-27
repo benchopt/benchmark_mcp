@@ -17,4 +17,4 @@ solver:
   - PGD
   - WorkSet_CD
 
-output: mcp-neurips
+output: mcp_neurips
