@@ -1,12 +1,19 @@
 import re
-import os
 import itertools
 from pathlib import Path
 
 import numpy as np
 import pandas as pd
 import matplotlib.pyplot as plt
-from celer.plot_utils import configure_plt
+import matplotlib as mpl
+
+usetex = mpl.checkdep_usetex(True)
+params = {
+    "font.family": "sans-serif",
+    "font.sans-serif": ["Computer Modern Roman"],
+    "text.usetex": usetex,
+}
+mpl.rcParams.update(params)
 
 
 # SAVEFIG = False
@@ -42,30 +49,45 @@ DICT_XLIM = {
 }
 
 DICT_TITLE = {
-    'MCP Regression[gamma=3,reg=0.1]': r'$\lambda = 0.1 \lambda_{\mathrm{max}}$',
-    'MCP Regression[gamma=3,reg=0.01]': r'$\lambda = 0.01 \lambda_{\mathrm{max}}$',
-    'MCP Regression[gamma=3,reg=0.001]': r'$\lambda = 0.001 \lambda_{\mathrm{max}}$',
+    'MCP Regression[gamma=3,reg=0.1]': (
+        r'$\lambda = 0.1 \lambda_{\mathrm{max}}$'
+    ),
+    'MCP Regression[gamma=3,reg=0.01]': (
+        r'$\lambda = 0.01 \lambda_{\mathrm{max}}$'
+    ),
+    'MCP Regression[gamma=3,reg=0.001]': (
+        r'$\lambda = 0.001 \lambda_{\mathrm{max}}$'
+    ),
 }
 
 DICT_YLABEL = {
     'libsvm[dataset=colon-cancer]': "colon-cancer",
     'Simulated[n_features=2000,n_samples=500,scale=True]': 'simulated',
-    'Simulated[n_features=2000,n_samples=500,scale=False]': 'simulated (scaled)'
+    'Simulated[n_features=2000,n_samples=500,scale=False]': (
+        'simulated (scaled)'
+    )
 }
 
 DICT_YTICKS = {
     'libsvm[dataset=colon-cancer]': [1e2, 1e-1, 1e-4, 1e-7, 1e-10],
-    'Simulated[n_features=2000,n_samples=500,scale=True]': [1e2, 1e-1, 1e-4, 1e-7, 1e-10],
-    'Simulated[n_features=2000,n_samples=500,scale=False]': [1e2, 1e-1, 1e-4, 1e-7, 1e-10],
+    'Simulated[n_features=2000,n_samples=500,scale=True]': [
+        1e2, 1e-1, 1e-4, 1e-7, 1e-10
+    ],
+    'Simulated[n_features=2000,n_samples=500,scale=False]': [
+        1e2, 1e-1, 1e-4, 1e-7, 1e-10
+    ],
 }
 
 DICT_XTICKS = {
-    'Simulated[n_features=2000,n_samples=500,scale=False]': np.geomspace(1e-3, 1e1, 5),
-    'Simulated[n_features=2000,n_samples=500,scale=True]': np.geomspace(1e-3, 1e1, 5),
+    'Simulated[n_features=2000,n_samples=500,scale=False]': (
+        np.geomspace(1e-3, 1e1, 5)
+    ),
+    'Simulated[n_features=2000,n_samples=500,scale=True]': (
+        np.geomspace(1e-3, 1e1, 5)
+    ),
     'libsvm[dataset=colon-cancer]': np.geomspace(1e-4, 1e2, 7),
 }
 
-configure_plt()
 CMAP = plt.get_cmap('tab20')
 style = {solv: (CMAP(i), MARKERS[i]) for i, solv in enumerate(all_solvers)}
 
@@ -124,7 +146,9 @@ for idx_data, dataset in enumerate(datasets):
                 label=SOLVERS[solver_name], linewidth=2, markevery=3)
 
         ax.set_xlim([DICT_XLIM.get(dataset, MIN_XLIM), ax.get_xlim()[1]])
-        axarr[len(datasets)-1, idx_obj].set_xlabel("Time (s)", fontsize=labelsize)
+        axarr[len(datasets)-1, idx_obj].set_xlabel(
+            "Time (s)", fontsize=labelsize
+        )
         axarr[0, idx_obj].set_title(
             DICT_TITLE[objective], fontsize=labelsize)
 
