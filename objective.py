@@ -20,6 +20,7 @@ def subdiff_distance(w, grad, lmbd, gamma):
 
 
 class Objective(BaseObjective):
+    min_benchopt_version = "1.3"
     name = "MCP Regression"
 
     parameters = {"reg": [1, 0.5, 0.1, 0.01], "gamma": [3]}
