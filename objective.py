@@ -23,7 +23,7 @@ class Objective(BaseObjective):
     min_benchopt_version = "1.3"
     name = "MCP Regression"
 
-    parameters = {"reg": [1, 0.5, 0.1, 0.01], "gamma": [3]}
+    parameters = {"reg": [0.5, 0.1, 0.01, 0.001], "gamma": [3]}
 
     def __init__(self, reg=0.1, gamma=1.2):
         self.reg = reg
