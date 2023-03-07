@@ -21,16 +21,7 @@ $$y \\in \\mathbb{R}^n, \\ X \\in \\mathbb{R}^{n \\times p}$$
 Install
 --------
 
-This benchmark can be downloaded using the following commands:
-
-.. code-block::
-
-   $ pip install -U benchopt
-   $ git clone https://github.com/benchopt/benchmark_mcp
-   $ cd benchmark_mcp/
-
-
-To demonstrate the use of benchopt on a simple benchmark configuration, one can run, from the `benchmark_lasso` folder:
+To demonstrate the use of benchopt on a simple benchmark configuration, one can run, from the `benchmark_mcp` folder:
 
 .. code-block::
 
@@ -44,27 +35,7 @@ Alternatively, one can use the command line interface to select which objectives
    $ benchopt run -s cd -s pgd -d simulated --max-runs 10 --n-repetitions 5
 
 
-Use `benchopt run -h` for more details about these options, or visit https://benchopt.github.io/api.html.
+Use `benchopt run -h` for more details about these options.
 
-
-Troubleshooting
----------------
-
-If you run into some errors when running the examples present in this Readme, try installing the development version of `benchopt`:
-
-.. code-block::
-
-  $ pip install -U git+https://github.com/benchopt/benchopt
-
-If issues persist, you can also try running the benchmark in local mode with the `-l` option, e.g.:
-
-.. code-block::
-
-  $ benchopt run . -l -s cd -d simulated --max-runs 10 --n-repetitions 10
-
-Use ``benchopt run -h`` for more details about these options, or visit https://benchopt.github.io/cli.html.
-
-.. |Build Status| image:: https://github.com/benchopt/benchmark_mcp/workflows/Tests/badge.svg
-   :target: https://github.com/benchopt/benchmark_mcp/actions
 .. |Python 3.6+| image:: https://img.shields.io/badge/python-3.6%2B-blue
    :target: https://www.python.org/downloads/release/python-360/
