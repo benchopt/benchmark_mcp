@@ -78,7 +78,6 @@ class Solver(BaseSolver):
                 self.X, self.y, self.lmbd, self.gamma, lipschitz, n_iter
             )
 
-    @staticmethod
     @njit
     def cd(X, y, lmbd, gamma, lipschitz, n_iter):
         n_samples, n_features = X.shape
@@ -98,7 +97,6 @@ class Solver(BaseSolver):
                         R += diff * X[:, j]
         return w
 
-    @staticmethod
     @njit
     def sparse_cd(
             X_data, X_indices, X_indptr, y, lmbd, gamma, lipschitz, n_iter):
